@@ -897,7 +897,7 @@ bot.action("settings", async (ctx) => {
             `│⌘ /delprem ID\n` +
             `│╰┈➤ Delete Premium Users\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "Cancer BACK", callback_data: "back" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -937,7 +937,7 @@ bot.action("toolsmenu", async (ctx) => {
             `│⌘ /tourl [ Reply Media ]\n` +
             `│⌘ /tonaked [ Reply Image ]\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "Cancer BACK", callback_data: "back" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -971,7 +971,7 @@ bot.action("trashshow", async (ctx) => {
             `│⌘ /CancerDelayHard 62xx\n` +
             `│⌘ /CancerCombo 62xx\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "Cancer Back", callback_data: "back" }]];
+        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(bugMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1000,7 +1000,7 @@ bot.action("thanksto", async (ctx) => {
             `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Friend\n` +
             `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> All User Cancer TrashFlocks\n` +
             `All User Cancer`;
-        const button = [[{ text: "BACK", callback_data: "back" }]];
+        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(tqtoMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1094,7 +1094,7 @@ bot.command("trackip", async (ctx) => {
             `⌘ Lat/Lon: ${lat || "-"}, ${lon || "-"}`;
 
         const replyMarkup = mapsUrl ? {
-            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl }]]
+            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl, style: btnStyler.get(), icon_custom_emoji_id: "5463392464314315076" }]]
         } : null;
 
         try {
@@ -2692,7 +2692,7 @@ async function sendBugCommand(ctx, opts) {
                 parse_mode: "HTML",
                 reply_markup: {
                     inline_keyboard: [[
-                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}` }
+                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778121946868749491" }
                     ]]
                 }
             }
@@ -2831,7 +2831,6 @@ bot.command("Cancer9", checkPremium, checkCooldown, checkWhatsAppConnection, asy
                 await blank1(target);
                 await blank2(target);
                 await blank3(target);
-                await blank4(target);
                 await blank5(target);
                 await sleep(1000);
             }
@@ -2928,7 +2927,7 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}` }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -2986,7 +2985,7 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}` }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3044,7 +3043,7 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}` }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3102,7 +3101,7 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}` }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3160,7 +3159,7 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}` }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
