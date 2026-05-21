@@ -266,6 +266,7 @@ const sessionPath = "./session";
 if (!fs.existsSync("./database")) fs.mkdirSync("./database");
 if (!fs.existsSync("./session")) fs.mkdirSync("./session");
 if (!fs.existsSync("./database/murbug.json")) fs.writeFileSync("./database/murbug.json", JSON.stringify([], null, 2));
+if (!fs.existsSync("./database/blockcmd.json")) fs.writeFileSync("./database/blockcmd.json", JSON.stringify({}, null, 2));
 if (!fs.existsSync("./database/premium.json")) fs.writeFileSync("./database/premium.json", JSON.stringify([], null, 2));
 if (!fs.existsSync("./database/admin.json")) fs.writeFileSync("./database/admin.json", JSON.stringify([], null, 2));
 if (!fs.existsSync("./database/owner.json")) fs.writeFileSync("./database/owner.json", JSON.stringify([], null, 2));
@@ -304,6 +305,8 @@ let ownerUsers = loadJSON(ownerFile);
 let adminUsers = loadJSON(adminFile);
 let premiumUsers = loadJSON(premiumFile);
 let murbugGroups = new Set(loadJSON(murbugFile));
+const blockcmdFile = "./database/blockcmd.json";
+let blockcmdData = loadJSON(blockcmdFile) || {};
 
 // ==========================================
 // [ ASSETS & RUNTIME ]
@@ -372,11 +375,11 @@ const checkOwnerOrAdmin = (ctx, next) => {
 (async () => {
     try {
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
+            [{ command: 'start', description: 'Cancer TrashFlocks By Itss Dric' }],
             { scope: { type: 'all_private_chats' } }
         );
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
+            [{ command: 'start', description: 'Cancer TrashFlocks By Itss Dric' }],
             { scope: { type: 'all_group_chats' } }
         );
         console.log("✅ Commands berhasil didaftarkan.");
@@ -520,15 +523,36 @@ bot.start(async (ctx) => {
         try { await ctx.react("⚡"); } catch (e) {}
 
         const userStatus = getStatus(ctx.from.id);
+        const runtime    = getBotRuntime();
+
+        // Hitung sender & status WA
+        let senderCount = 0;
+        let senderStatus = "🔴 Offline";
+        try {
+            if (fs.existsSync("./session")) {
+                const entries = fs.readdirSync("./session", { withFileTypes: true });
+                senderCount = entries.filter(e => e.isDirectory()).length;
+            }
+            const sock = global.waSocket || global.conn;
+            if (sock?.ws?.readyState === 1) senderStatus = "🟢 Online";
+        } catch {}
+
         const startMsg =
-            `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
+            `<blockquote expandable><b>🦀 Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs 🦀</b></blockquote>\n` +
             `<pre><code class="language-yaml">` +
-            `[ CANCER V20 ENGINE ]\n\n` +
-            `User   : ${ctx.from.first_name}\n` +
-            `ID     : ${ctx.from.id}\n` +
-            `Status : ${userStatus}\n\n` +
-            `Pilih menu di bawah untuk eksekusi.` +
-            `</code></pre>`;
+            `╔══════ CANCER V20 ══════╗\n\n` +
+            `  Bot     : Cancer TrashFlocks\n` +
+            `  Dev     : Its Dric\n` +
+            `  Prefix  : Slash [ / ]\n` +
+            `  Runtime : \${runtime}\n\n` +
+            `  User    : \${ctx.from.first_name}\n` +
+            `  ID      : \${ctx.from.id}\n` +
+            `  Status  : \${userStatus}\n\n` +
+            `  Sender  : \${senderCount} Nomor\n` +
+            `  WA      : \${senderStatus}\n\n` +
+            `╚═══════════════════════╝` +
+            `</code></pre>\n` +
+            `<blockquote><i>Pilih menu di bawah untuk eksekusi.</i></blockquote>`;
 
         try {
             let sent;
@@ -635,7 +659,7 @@ bot.start(async (ctx) => {
             `Runtime   : ${runtime}` +
             `</code></pre>`;
 
-        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: style, icon_custom_emoji_id: "5463274047771000031" }]];
+        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5463274047771000031" }]];
 
         await ctx.replyWithPhoto(thumbnailurl, {
             caption: menuMessage,
@@ -776,13 +800,18 @@ bot.action("fitur_pg1", async (ctx) => {
     }
     const txt =
         `<b>[ MENU FITUR <tg-emoji emoji-id="5463081281048818043"></tg-emoji> ]</b>\n\n` +
-        `<b>AKSES</b>\n` +
-        `/addprem - Tambah Premium\n` +
-        `/delprem - Hapus Premium\n` +
-        `/addadmin - Tambah Admin\n\n` +
-        `<b>GRUP</b>\n` +
-        `/addmurbug - Izinkan Grup\n` +
-        `/listmurbug - List Grup Aktif`;
+        `<b>👑 AKSES</b>\n` +
+        `├ /addprem - Tambah Premium\n` +
+        `├ /delprem - Hapus Premium\n` +
+        `└ /addadmin - Tambah Admin\n\n` +
+        `<b>🏘️ GRUP</b>\n` +
+        `├ /addmurbug - Izinkan Grup\n` +
+        `├ /delmurbug - Hapus Grup\n` +
+        `└ /listmurbug - List Grup Aktif\n\n` +
+        `<b>🚫 BLOCK CMD</b>\n` +
+        `├ /blockcmd [cmd] - Block Fitur di Grup\n` +
+        `├ /delblockcmd [cmd] - Hapus Block\n` +
+        `└ /listblockcmd - List Fitur Terblokir`;
     try {
         await ctx.editMessageCaption(txt, {
             parse_mode: "HTML",
@@ -2694,6 +2723,107 @@ bot.command("listmurbug", async (ctx) => {
     } catch (e) {
         console.log("listmurbug error:", e?.message);
     }
+});
+
+// ==========================================
+// [ BLOCKCMD - OWNER & ADMIN, GRUP ONLY ]
+// /blockcmd omega → block fitur /omega di grup ini
+// /delblockcmd omega → hapus block
+// /listblockcmd → list semua yang diblock
+// ==========================================
+
+bot.command("blockcmd", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.replyWithHTML("<b>⚠️ Hanya untuk grup!</b>");
+    if (!isOwnerOrAdmin(ctx.from.id)) return ctx.replyWithHTML("<blockquote>Owner & Admin Access Only</blockquote>");
+
+    try {
+        const args = ctx.message.text.split(" ");
+        const cmd = args[1]?.toLowerCase().replace(/^\//, "");
+        if (!cmd) return ctx.replyWithHTML(
+            "<b>🚫 BLOCK CMD</b>\n" +
+            "Format: <code>/blockcmd [nama_fitur]</code>\n" +
+            "Contoh: <code>/blockcmd omega</code>"
+        );
+
+        const chatId = ctx.chat.id.toString();
+        blockcmdData = loadJSON(blockcmdFile) || {};
+        if (!blockcmdData[chatId]) blockcmdData[chatId] = [];
+
+        if (blockcmdData[chatId].includes(cmd)) {
+            return ctx.replyWithHTML(`<b>⚠️ Fitur <code>/${cmd}</code> sudah diblock di grup ini!</b>`);
+        }
+
+        blockcmdData[chatId].push(cmd);
+        saveJSON(blockcmdFile, blockcmdData);
+
+        await ctx.replyWithHTML(
+            `<b>🚫 BLOCK CMD AKTIF</b>\n\n` +
+            `├ Grup  : <code>${ctx.chat.title}</code>\n` +
+            `└ Fitur : <code>/${cmd}</code>\n\n` +
+            `<i>Fitur tersebut tidak dapat digunakan di grup ini.</i>`
+        );
+    } catch (e) { console.log("blockcmd error:", e?.message); }
+});
+
+bot.command("delblockcmd", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.replyWithHTML("<b>⚠️ Hanya untuk grup!</b>");
+    if (!isOwnerOrAdmin(ctx.from.id)) return ctx.replyWithHTML("<blockquote>Owner & Admin Access Only</blockquote>");
+
+    try {
+        const args = ctx.message.text.split(" ");
+        const cmd = args[1]?.toLowerCase().replace(/^\//, "");
+        if (!cmd) return ctx.replyWithHTML(
+            "<b>🗑️ DEL BLOCK CMD</b>\n" +
+            "Format: <code>/delblockcmd [nama_fitur]</code>\n" +
+            "Contoh: <code>/delblockcmd omega</code>"
+        );
+
+        const chatId = ctx.chat.id.toString();
+        blockcmdData = loadJSON(blockcmdFile) || {};
+        if (!blockcmdData[chatId] || !blockcmdData[chatId].includes(cmd)) {
+            return ctx.replyWithHTML(`<b>⚠️ Fitur <code>/${cmd}</code> tidak ada di list block grup ini!</b>`);
+        }
+
+        blockcmdData[chatId] = blockcmdData[chatId].filter(c => c !== cmd);
+        if (blockcmdData[chatId].length === 0) delete blockcmdData[chatId];
+        saveJSON(blockcmdFile, blockcmdData);
+
+        await ctx.replyWithHTML(
+            `<b>✅ BLOCK DIHAPUS</b>\n\n` +
+            `├ Grup  : <code>${ctx.chat.title}</code>\n` +
+            `└ Fitur : <code>/${cmd}</code>\n\n` +
+            `<i>Fitur tersebut sudah bisa digunakan kembali.</i>`
+        );
+    } catch (e) { console.log("delblockcmd error:", e?.message); }
+});
+
+bot.command("listblockcmd", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.replyWithHTML("<b>⚠️ Hanya untuk grup!</b>");
+    if (!isOwnerOrAdmin(ctx.from.id)) return ctx.replyWithHTML("<blockquote>Owner & Admin Access Only</blockquote>");
+
+    try {
+        const chatId = ctx.chat.id.toString();
+        blockcmdData = loadJSON(blockcmdFile) || {};
+        const list = blockcmdData[chatId] || [];
+
+        if (list.length === 0) {
+            return ctx.replyWithHTML(
+                `<b>📋 LIST BLOCK CMD</b>\n\n` +
+                `<i>Belum ada fitur yang diblock di grup ini.</i>`
+            );
+        }
+
+        let txt = `<b>📋 LIST BLOCK CMD</b>\n`;
+        txt += `<b>Grup: ${ctx.chat.title}</b>\n`;
+        txt += `━━━━━━━━━━━━━━━━━━━━\n`;
+        list.forEach((cmd, i) => {
+            txt += `${i + 1}. <code>/${cmd}</code>\n`;
+        });
+        txt += `━━━━━━━━━━━━━━━━━━━━\n`;
+        txt += `<i>Total: ${list.length} fitur diblock</i>`;
+
+        await ctx.replyWithHTML(txt);
+    } catch (e) { console.log("listblockcmd error:", e?.message); }
 });
 
 // ==========================================
