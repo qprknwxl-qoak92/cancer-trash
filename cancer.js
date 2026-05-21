@@ -520,8 +520,6 @@ bot.start(async (ctx) => {
         adminUsers  = loadJSON(adminFile);
         premiumUsers = loadJSON(premiumFile);
 
-        try { await ctx.react("⚡"); } catch (e) {}
-
         const userStatus = getStatus(ctx.from.id);
         const runtime    = getBotRuntime();
 
@@ -646,20 +644,24 @@ bot.start(async (ctx) => {
         }
 
         // Tampil menu private
+        const userStatusPv = getStatus(ctx.from.id);
         const menuMessage =
-            `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
-            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n\n` +
+            `<blockquote expandable><b>🦀 Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs 🦀</b></blockquote>\n` +
             `<pre><code class="language-yaml">` +
-            `Bot Name  : Cancer TrashFlocks\n` +
-            `Developer : Its Dric\n` +
-            `Version   : 20.0.0\n` +
-            `Language  : JavaScript\n` +
-            `Prefix    : Slash [ / ]\n` +
-            `Username  : ${ctx.from.first_name}\n` +
-            `Runtime   : ${runtime}` +
-            `</code></pre>`;
+            `╔══════ CANCER V20 ══════╗\n\n` +
+            `  Bot     : Cancer TrashFlocks\n` +
+            `  Dev     : Its Dric\n` +
+            `  Version : 20.0.0\n` +
+            `  Prefix  : Slash [ / ]\n` +
+            `  Runtime : ${runtime}\n\n` +
+            `  User    : ${ctx.from.first_name}\n` +
+            `  ID      : ${ctx.from.id}\n` +
+            `  Status  : ${userStatusPv}\n\n` +
+            `╚═══════════════════════╝` +
+            `</code></pre>\n` +
+            `<blockquote><i>Silahkan pilih menu.</i></blockquote>`;
 
-        const button = [[{ text: "「 ♱ 」Open Menu", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5463274047771000031" }]];
+        const button = btnUtama.getMainKeyboard();
 
         await ctx.replyWithPhoto(thumbnailurl, {
             caption: menuMessage,
@@ -733,7 +735,6 @@ bot.action("list_trash", async (ctx) => {
     if (!isGroup(ctx)) {
         return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     }
-    try { await ctx.react("🔥"); } catch (e) {}
     const gagahMsg =
         `<b>[ TRASH FEATURE - CANCER V20 ]</b>\n\n` +
         `<b>Cancer - TrashFlocks</b>\n\n` +
@@ -775,7 +776,6 @@ bot.action("tq_to", async (ctx) => {
     if (!isGroup(ctx)) {
         return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     }
-    try { await ctx.react("❤️"); } catch (e) {}
     const gagahMsg =
         `<b>[ THANKS TO ]</b>\n\n` +
         `<b>THANKS SUPPORT FROM</b>\n\n` +
@@ -1734,7 +1734,6 @@ bot.command("addsender", async (ctx) => {
     let loadingMsg = null;
 
     try {
-        await ctx.react("⏳").catch(() => {});
         loadingMsg = await ctx.replyWithHTML(
             `<b>⏳ Memproses pairing code untuk:</b> <code>+${phoneNumber}</code>...`
         ).catch(() => null);
@@ -1818,7 +1817,6 @@ bot.command("addsender", async (ctx) => {
             if (connection === "open") {
                 isConnected = true;
                 reconnectAttempt = 0;
-                try { await ctx.react("✅"); } catch (e) {}
                 await ctx.replyWithHTML(
                     `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
                     `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
@@ -1927,7 +1925,6 @@ bot.command("listsender", async (ctx) => {
     }
 
     try {
-        await ctx.react("📋").catch(() => {});
 
         const sock = global.waSocket || global.conn;
         const sockStatus = sock?.ws?.readyState === 1 ? "🟢 Terhubung" : "🔴 Tidak Terhubung";
@@ -1968,7 +1965,6 @@ bot.command("delsender", async (ctx) => {
     }
 
     try {
-        await ctx.react("🗑️").catch(() => {});
 
         if (fs.existsSync("./session")) {
             fs.rmSync("./session", { recursive: true, force: true });
@@ -2284,7 +2280,6 @@ bot.command("connect", checkWhatsAppConnection, async (ctx) => {
     let loadingMsg = null;
 
     try {
-        await ctx.react("⏳").catch(() => {});
         loadingMsg = await ctx.replyWithHTML(
             `<b>⏳ Memproses pairing code untuk:</b> <code>+${phoneNumber}</code>...`
         ).catch(() => null);
@@ -2367,7 +2362,6 @@ bot.command("connect", checkWhatsAppConnection, async (ctx) => {
             if (connection === "open") {
                 isConnected = true;
                 reconnectAttempt = 0;
-                try { await ctx.react("✅"); } catch (e) {}
                 await ctx.replyWithHTML(
                     `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
                     `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
@@ -2477,7 +2471,6 @@ bot.command("listsender", async (ctx) => {
     }
 
     try {
-        await ctx.react("📋").catch(() => {});
 
         const sock = global.waSocket || global.conn;
         const sockStatus = sock?.ws?.readyState === 1 ? "🟢 Terhubung" : "🔴 Tidak Terhubung";
@@ -3081,8 +3074,6 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
         if (!checkAccess(ctx, murbugData, isVip)) return;
         if (!q) return ctx.reply("❌ Example: /trash 62xxx").catch(() => {});
 
-        try { await ctx.react("🔥"); } catch (e) {}
-
         const target = q.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const sock = global.conn;
         const senderNum = sock.user?.id?.split(":")[0] || "Unknown";
@@ -3142,8 +3133,6 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
         if (!checkAccess(ctx, murbugData, isVip)) return;
         if (!q) return ctx.reply("❌ Example: /invasion 62xxx").catch(() => {});
 
-        try { await ctx.react("🌪️"); } catch (e) {}
-
         const target = q.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const sock = global.conn;
         const senderNum = sock.user?.id?.split(":")[0] || "Unknown";
@@ -3202,8 +3191,6 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
         if (!checkAccess(ctx, murbugData, isVip)) return;
         if (!q) return ctx.reply("❌ Example: /omega 62xxx").catch(() => {});
 
-        try { await ctx.react("🌌"); } catch (e) {}
-
         const target = q.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const sock = global.conn;
         const senderNum = sock.user?.id?.split(":")[0] || "Unknown";
@@ -3261,8 +3248,6 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
         if (!checkAccess(ctx, murbugData, isVip)) return;
         if (!q) return ctx.reply("❌ Example: /kuantum 62xxx").catch(() => {});
 
-        try { await ctx.react("☢️"); } catch (e) {}
-
         const target = q.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const sock = global.conn;
         const senderNum = sock.user?.id?.split(":")[0] || "Unknown";
@@ -3319,8 +3304,6 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
         const { murbugData, isVip } = loadDB(ctx);
         if (!checkAccess(ctx, murbugData, isVip)) return;
         if (!q) return ctx.reply("❌ Example: /modols 62xxx").catch(() => {});
-
-        try { await ctx.react("☣️"); } catch (e) {}
 
         const target = q.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const sock = global.conn;
