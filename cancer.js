@@ -375,11 +375,11 @@ const checkOwnerOrAdmin = (ctx, next) => {
 (async () => {
     try {
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Cancer TrashFlocks By Itss Dric' }],
+            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
             { scope: { type: 'all_private_chats' } }
         );
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Cancer TrashFlocks By Itss Dric' }],
+            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
             { scope: { type: 'all_group_chats' } }
         );
         console.log("✅ Commands berhasil didaftarkan.");
@@ -544,12 +544,12 @@ bot.start(async (ctx) => {
             `  Bot     : Cancer TrashFlocks\n` +
             `  Dev     : Its Dric\n` +
             `  Prefix  : Slash [ / ]\n` +
-            `  Runtime : \${runtime}\n\n` +
-            `  User    : \${ctx.from.first_name}\n` +
-            `  ID      : \${ctx.from.id}\n` +
-            `  Status  : \${userStatus}\n\n` +
-            `  Sender  : \${senderCount} Nomor\n` +
-            `  WA      : \${senderStatus}\n\n` +
+            `  Runtime : ${runtime}\n\n` +
+            `  User    : ${ctx.from.first_name}\n` +
+            `  ID      : ${ctx.from.id}\n` +
+            `  Status  : ${userStatus}\n\n` +
+            `  Sender  : ${senderCount} Nomor\n` +
+            `  WA      : ${senderStatus}\n\n` +
             `╚═══════════════════════╝` +
             `</code></pre>\n` +
             `<blockquote><i>Pilih menu di bawah untuk eksekusi.</i></blockquote>`;
