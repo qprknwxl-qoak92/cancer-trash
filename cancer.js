@@ -437,13 +437,35 @@ function canEditGrup(chatId, msgId) {
     const key = `${chatId}_${msgId}`;
     const now = Date.now();
     const last = grupCooldown.get(key) || 0;
-    if (now - last < 1500) return false;
+    if (now - last < 500) return false;
     grupCooldown.set(key, now);
     if (grupCooldown.size > 500) {
         const oldest = [...grupCooldown.entries()].sort((a, b) => a[1] - b[1]).slice(0, 100);
         oldest.forEach(([k]) => grupCooldown.delete(k));
     }
     return true;
+}
+
+// ==========================================
+// [ RETRY HELPER - ANTI 429 ]
+// ==========================================
+async function safeEdit(fn, maxRetries = 4) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (err) {
+            const msg = err?.message || "";
+            if (msg.includes("message is not modified")) return;
+            const match = msg.match(/retry after (\d+)/i);
+            if (match) {
+                const wait = (parseInt(match[1]) + 1) * 1000;
+                console.log(`[RATE LIMIT] Nunggu ${wait/1000}s sebelum retry...`);
+                await sleep(wait);
+            } else {
+                throw err;
+            }
+        }
+    }
 }
 
 // ==========================================
@@ -506,7 +528,7 @@ const btnKembali = {
 const btnNavigasi1 = {
     inline_keyboard: [
         [
-            { text: "1 / 2", callback_data: "none" },
+            { text: "1 / 2", callback_data: "none", style: "Danger" },
             { text: "NEXT >>", callback_data: "fitur_pg2", style: "Danger", icon_custom_emoji_id: "5465198330558557107" }
         ],
         [{ text: "KEMBALI", callback_data: "back_start", style: "Primary", icon_custom_emoji_id: "5465465194056525619" }]
@@ -517,9 +539,9 @@ const btnNavigasi2 = {
     inline_keyboard: [
         [
             { text: "<< BACK", callback_data: "fitur_pg1" },
-            { text: "2 / 2", callback_data: "none" }
+            { text: "2 / 2", callback_data: "none", style: "Danger" }
         ],
-        [{ text: "KEMBALI", callback_data: "back_start", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Primary", icon_custom_emoji_id: "5462990652943904884" }]
     ]
 };
 
@@ -571,14 +593,14 @@ bot.start(async (ctx) => {
             `<blockquote><i>Pilih menu di bawah untuk eksekusi.</i></blockquote>`;
 
         try {
-            await ctx.replyWithPhoto(
+            await safeEdit(() => ctx.replyWithPhoto(
                 IMAGES.start,
                 {
                     caption: startMsg,
                     parse_mode: "HTML",
                     reply_markup: btnUtama.getMainKeyboard()
                 }
-            );
+            ));
 
         } catch (e) {
             console.log("Start grup error:", e?.message);
@@ -752,14 +774,10 @@ bot.action("list_trash", async (ctx) => {
         `<i>"Target identified. No mercy, no remnants."</i>`;
     await ctx.answerCbQuery().catch(() => {});
     if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    try {
-        await ctx.editMessageMedia(
-            { type: "photo", media: IMAGES.trash, caption: gagahMsg, parse_mode: "HTML" },
-            { reply_markup: btnKembali }
-        );
-    } catch (e) {
-        if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message);
-    }
+    await safeEdit(() => ctx.editMessageMedia(
+        { type: "photo", media: IMAGES.trash, caption: gagahMsg, parse_mode: "HTML" },
+        { reply_markup: btnKembali }
+    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message); });
 });
 
 bot.action("back_start", async (ctx) => {
@@ -774,14 +792,10 @@ bot.action("back_start", async (ctx) => {
         `Kembali ke menu utama:`;
     await ctx.answerCbQuery().catch(() => {});
     if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    try {
-        await ctx.editMessageMedia(
-            { type: "photo", media: IMAGES.start, caption: startMsg, parse_mode: "HTML" },
-            { reply_markup: btnUtama.getMainKeyboard() }
-        );
-    } catch (e) {
-        if (!e?.message?.includes("message is not modified")) console.log("back_start error:", e?.message);
-    }
+    await safeEdit(() => ctx.editMessageMedia(
+        { type: "photo", media: IMAGES.start, caption: startMsg, parse_mode: "HTML" },
+        { reply_markup: btnUtama.getMainKeyboard() }
+    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("back_start error:", e?.message); });
 });
 
 bot.action("tq_to", async (ctx) => {
@@ -799,14 +813,10 @@ bot.action("tq_to", async (ctx) => {
         `♅<b>"Terimakasih atas segala support yang kalian berikan dalam pengembangan script ini, gunakan script dengan bijak dan terimakasih atas segala support yang kalian berikan."♅</b>\n\n`;
     await ctx.answerCbQuery().catch(() => {});
     if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    try {
-        await ctx.editMessageMedia(
-            { type: "photo", media: IMAGES.start, caption: gagahMsg, parse_mode: "HTML" },
-            { reply_markup: btnKembali }
-        );
-    } catch (e) {
-        if (!e?.message?.includes("message is not modified")) console.log("tq_to error:", e?.message);
-    }
+    await safeEdit(() => ctx.editMessageMedia(
+        { type: "photo", media: IMAGES.start, caption: gagahMsg, parse_mode: "HTML" },
+        { reply_markup: btnKembali }
+    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("tq_to error:", e?.message); });
 });
 
 bot.action("fitur_pg1", async (ctx) => {
@@ -829,14 +839,10 @@ bot.action("fitur_pg1", async (ctx) => {
         `└ /listblockcmd - List Fitur Terblokir`;
     await ctx.answerCbQuery().catch(() => {});
     if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    try {
-        await ctx.editMessageMedia(
-            { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
-            { reply_markup: btnNavigasi1 }
-        );
-    } catch (e) {
-        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg1 error:", e?.message);
-    }
+    await safeEdit(() => ctx.editMessageMedia(
+        { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
+        { reply_markup: btnNavigasi1 }
+    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("fitur_pg1 error:", e?.message); });
 });
 
 bot.action("fitur_pg2", async (ctx) => {
@@ -853,14 +859,10 @@ bot.action("fitur_pg2", async (ctx) => {
         `/restart - Reboot Engine`;
     await ctx.answerCbQuery().catch(() => {});
     if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    try {
-        await ctx.editMessageMedia(
-            { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
-            { reply_markup: btnNavigasi2 }
-        );
-    } catch (e) {
-        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg2 error:", e?.message);
-    }
+    await safeEdit(() => ctx.editMessageMedia(
+        { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
+        { reply_markup: btnNavigasi2 }
+    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("fitur_pg2 error:", e?.message); });
 });
 
 bot.action("none", async (ctx) => {
@@ -961,7 +963,7 @@ bot.action("settings", async (ctx) => {
             `│⌘ /delprem ID\n` +
             `│╰┈➤ Delete Premium Users\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1001,7 +1003,7 @@ bot.action("toolsmenu", async (ctx) => {
             `│⌘ /tourl [ Reply Media ]\n` +
             `│⌘ /tonaked [ Reply Image ]\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1036,7 +1038,7 @@ bot.action("trashshow", async (ctx) => {
             `│⌘ /cancerblank 62xx\n` +
             `│⌘ /cancercombo 62xx\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(bugMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
