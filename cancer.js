@@ -436,9 +436,8 @@ const styles = ["Primary", "Success", "Danger"];
 const btnUtama = {
     styleIndex: 0,
     getMainKeyboard() {
-        const style = styles[this.styleIndex]; // ambil style dulu
-
-        this.styleIndex = (this.styleIndex + 1) % styles.length; // baru increment
+        const style = styles[this.styleIndex];
+        this.styleIndex = (this.styleIndex + 1) % styles.length;
 
         return {
             inline_keyboard: [
@@ -458,49 +457,51 @@ const btnUtama = {
     }
 };
 
-// Shared style index untuk semua button (sama persis seperti btnUtama)
-const btnStyler = {
-    styleIndex: 0,
-    get() {
-        const style = styles[this.styleIndex];
-        this.styleIndex = (this.styleIndex + 1) % styles.length;
-        return style;
-    }
-};
+// ==========================================
+// [ TOMBOL PRIVATE - TERPISAH DARI GRUP ]
+// ==========================================
+function getPrivateMainKeyboard() {
+    return {
+        inline_keyboard: [
+            [
+                { text: "🦠 Trash Feture", callback_data: "trashshow", style: "Primary", icon_custom_emoji_id: "5465225015190367274" },
+                { text: "⚙️ Settings", callback_data: "settings", style: "Primary", icon_custom_emoji_id: "5463412289883353404" }
+            ],
+            [
+                { text: "🛠️ Tools", callback_data: "toolsmenu", style: "Danger", icon_custom_emoji_id: "5465137208878969279" },
+                { text: "🤝 Thanks To", callback_data: "thanksto", style: "Danger", icon_custom_emoji_id: "5463054218459884779" }
+            ],
+            [
+                { text: "👤 Creator", url: "https://t.me/xnnxdxc", style: "Success", icon_custom_emoji_id: "5463156928307801722" }
+            ]
+        ]
+    };
+}
 
 const btnKembali = {
-    get inline_keyboard() {
-        const style = btnStyler.get();
-        return [
-            [{ text: "BACK TO START", callback_data: "back_start", style: style }]
-        ];
-    }
+    inline_keyboard: [
+        [{ text: "BACK TO START", callback_data: "back_start" }]
+    ]
 };
 
 const btnNavigasi1 = {
-    get inline_keyboard() {
-        const style = btnStyler.get();
-        return [
-            [
-                { text: "1 / 2", callback_data: "none", style: style },
-                { text: "NEXT >>", callback_data: "fitur_pg2", style: style, icon_custom_emoji_id: "5465198330558557107" }
-            ],
-            [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5465465194056525619" }]
-        ];
-    }
+    inline_keyboard: [
+        [
+            { text: "1 / 2", callback_data: "none" },
+            { text: "NEXT >>", callback_data: "fitur_pg2", style: "Danger", icon_custom_emoji_id: "5465198330558557107" }
+        ],
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Primary", icon_custom_emoji_id: "5465465194056525619" }]
+    ]
 };
 
 const btnNavigasi2 = {
-    get inline_keyboard() {
-        const style = btnStyler.get();
-        return [
-            [
-                { text: "<< BACK", callback_data: "fitur_pg1", style: style },
-                { text: "2 / 2", callback_data: "none", style: style }
-            ],
-            [{ text: "KEMBALI", callback_data: "back_start", style: style, icon_custom_emoji_id: "5462990652943904884" }]
-        ];
-    }
+    inline_keyboard: [
+        [
+            { text: "<< BACK", callback_data: "fitur_pg1" },
+            { text: "2 / 2", callback_data: "none" }
+        ],
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]
+    ]
 };
 
 // ==========================================
@@ -509,8 +510,6 @@ const btnNavigasi2 = {
 // Private Owner → auto masuk tanpa kode
 // Private User  → wajib kode
 // ==========================================
-let menuAnimation = null;
-let menuMsg = null;
 
 bot.start(async (ctx) => {
 
@@ -553,8 +552,7 @@ bot.start(async (ctx) => {
             `<blockquote><i>Pilih menu di bawah untuk eksekusi.</i></blockquote>`;
 
         try {
-            let sent;
-            sent = await ctx.replyWithPhoto(
+            await ctx.replyWithPhoto(
                 IMAGES.start,
                 {
                     caption: startMsg,
@@ -562,30 +560,6 @@ bot.start(async (ctx) => {
                     reply_markup: btnUtama.getMainKeyboard()
                 }
             );
-
-            menuMsg = sent;
-
-            if (menuAnimation) {
-                clearInterval(menuAnimation);
-                menuAnimation = null;
-            }
-
-            menuAnimation = setInterval(async () => {
-                try {
-                    if (!menuMsg) return;
-                    await ctx.telegram.editMessageReplyMarkup(
-                        ctx.chat.id,
-                        menuMsg.message_id,
-                        null,
-                        btnUtama.getMainKeyboard()
-                    );
-                } catch (e) {
-                    if (e?.description?.includes("message to edit not found")) {
-                        clearInterval(menuAnimation);
-                        menuAnimation = null;
-                    }
-                }
-            }, 2500);
 
         } catch (e) {
             console.log("Start grup error:", e?.message);
@@ -645,6 +619,18 @@ bot.start(async (ctx) => {
 
         // Tampil menu private
         const userStatusPv = getStatus(ctx.from.id);
+
+        let senderCount = 0;
+        let senderStatus = "🔴 Offline";
+        try {
+            if (fs.existsSync("./session")) {
+                const entries = fs.readdirSync("./session", { withFileTypes: true });
+                senderCount = entries.filter(e => e.isDirectory()).length;
+            }
+            const sock = global.waSocket || global.conn;
+            if (sock?.ws?.readyState === 1) senderStatus = "🟢 Online";
+        } catch {}
+
         const menuMessage =
             `<blockquote expandable><b>🦀 Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs 🦀</b></blockquote>\n` +
             `<pre><code class="language-yaml">` +
@@ -657,16 +643,17 @@ bot.start(async (ctx) => {
             `  User    : ${ctx.from.first_name}\n` +
             `  ID      : ${ctx.from.id}\n` +
             `  Status  : ${userStatusPv}\n\n` +
+            `  Sender  : ${senderCount} Nomor\n` +
+            `  WA      : ${senderStatus}\n\n` +
+            `  Mode    : ✉️ Private Chat\n` +
             `╚═══════════════════════╝` +
             `</code></pre>\n` +
-            `<blockquote><i>Silahkan pilih menu.</i></blockquote>`;
-
-        const button = btnUtama.getMainKeyboard();
+            `<blockquote><i>Selamat datang! Pilih menu di bawah.</i></blockquote>`;
 
         await ctx.replyWithPhoto(thumbnailurl, {
             caption: menuMessage,
             parse_mode: "HTML",
-            reply_markup: { inline_keyboard: button }
+            reply_markup: getPrivateMainKeyboard()
         });
 
         if (fs.existsSync("./assets/Cancer.mp3")) {
@@ -846,28 +833,9 @@ bot.action("none", async (ctx) => {
     await ctx.answerCbQuery().catch(() => {});
 });
 
-bot.action("sawitjir", async (ctx) => {
-    if (menuAnimation) {
-        clearInterval(menuAnimation);
-        menuAnimation = null;
-    }
-    await ctx.answerCbQuery().catch(() => {});
-});
-
 // ==========================================
 // [ ACTIONS PRIVATE ONLY ]
 // ==========================================
-const stylesBtn = ["primary", "success", "danger"];
-
-const btnStylerPrivate = {
-    index: 0,
-
-    get() {
-        const style = stylesBtn[this.index];
-        this.index = (this.index + 1) % stylesBtn.length;
-        return style;
-    }
-};
 
 bot.action("back", async (ctx) => {
     if (!isPrivate(ctx)) {
@@ -877,59 +845,37 @@ bot.action("back", async (ctx) => {
     try {
         const runtime = getBotRuntime();
 
-        const menuMessage =
-            `<blockquote><b>Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs</b></blockquote>\n\n` +
-            `➤「 𝐈𝐍𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐎𝐍 」\n\n` +
-            `<pre><code class="language-yaml">` +
-            `Bot Name  : Cancer TrashFlocks\n` +
-            `Developer : Its Dric\n` +
-            `Version   : 20.0.0\n` +
-            `Language  : JavaScript\n` +
-            `Prefix    : Slash [ / ]\n` +
-            `Username  : ${ctx.from.first_name}\n` +
-            `Runtime   : ${runtime}` +
-            `</code></pre>`;
+        let senderCount = 0;
+        let senderStatus = "🔴 Offline";
+        try {
+            if (fs.existsSync("./session")) {
+                const entries = fs.readdirSync("./session", { withFileTypes: true });
+                senderCount = entries.filter(e => e.isDirectory()).length;
+            }
+            const sock = global.waSocket || global.conn;
+            if (sock?.ws?.readyState === 1) senderStatus = "🟢 Online";
+        } catch {}
 
-        const button = [
-            [
-                {
-                    text: "「 ♱ 」Trash Feture",
-                    callback_data: "trashshow",
-                    style: btnStylerPrivate.get(),
-                    icon_custom_emoji_id: "5465225015190367274"
-                }
-            ],
-            [
-                {
-                    text: "「 ♱ 」Settings",
-                    callback_data: "settings",
-                    style: btnStylerPrivate.get(),
-                    icon_custom_emoji_id: "5463412289883353404"
-                },
-                {
-                    text: "「 ♱ 」Tools",
-                    callback_data: "toolsmenu",
-                    style: btnStylerPrivate.get(),
-                    icon_custom_emoji_id: "5465137208878969279"
-                }
-            ],
-            [
-                {
-                    text: "「 ♱ 」Thanks To",
-                    callback_data: "thanksto",
-                    style: btnStylerPrivate.get(),
-                    icon_custom_emoji_id: "5463054218459884779"
-                }
-            ],
-            [
-                {
-                    text: "「 ♱ 」Creator",
-                    url: "https://t.me/xnnxdxc",
-                    style: btnStylerPrivate.get(),
-                    icon_custom_emoji_id: "5463274047771000031"
-                }
-            ]
-        ];
+        const userStatusPv = getStatus(ctx.from.id);
+
+        const menuMessage =
+            `<blockquote expandable><b>🦀 Cᴀɴᴄᴇʀ Tʀᴀsʜғʟᴏᴄᴋs 🦀</b></blockquote>\n` +
+            `<pre><code class="language-yaml">` +
+            `╔══════ CANCER V20 ══════╗\n\n` +
+            `  Bot     : Cancer TrashFlocks\n` +
+            `  Dev     : Its Dric\n` +
+            `  Version : 20.0.0\n` +
+            `  Prefix  : Slash [ / ]\n` +
+            `  Runtime : ${runtime}\n\n` +
+            `  User    : ${ctx.from.first_name}\n` +
+            `  ID      : ${ctx.from.id}\n` +
+            `  Status  : ${userStatusPv}\n\n` +
+            `  Sender  : ${senderCount} Nomor\n` +
+            `  WA      : ${senderStatus}\n\n` +
+            `  Mode    : ✉️ Private Chat\n` +
+            `╚═══════════════════════╝` +
+            `</code></pre>\n` +
+            `<blockquote><i>Selamat datang! Pilih menu di bawah.</i></blockquote>`;
 
         await ctx.editMessageMedia(
             {
@@ -939,9 +885,7 @@ bot.action("back", async (ctx) => {
                 parse_mode: "HTML"
             },
             {
-                reply_markup: {
-                    inline_keyboard: button
-                }
+                reply_markup: getPrivateMainKeyboard()
             }
         );
 
@@ -983,7 +927,7 @@ bot.action("settings", async (ctx) => {
             `│⌘ /delprem ID\n` +
             `│╰┈➤ Delete Premium Users\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1023,7 +967,7 @@ bot.action("toolsmenu", async (ctx) => {
             `│⌘ /tourl [ Reply Media ]\n` +
             `│⌘ /tonaked [ Reply Image ]\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(controlsMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1058,7 +1002,7 @@ bot.action("trashshow", async (ctx) => {
             `│⌘ /cancerblank 62xx\n` +
             `│⌘ /cancercombo 62xx\n` +
             `╰───────────────⊱`;
-        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」Cancer Back", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(bugMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1087,7 +1031,7 @@ bot.action("thanksto", async (ctx) => {
             `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Friend\n` +
             `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> All User Cancer TrashFlocks\n` +
             `All User Cancer`;
-        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", style: btnStylerPrivate.get(), icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(tqtoMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -1181,7 +1125,7 @@ bot.command("trackip", async (ctx) => {
             `⌘ Lat/Lon: ${lat || "-"}, ${lon || "-"}`;
 
         const replyMarkup = mapsUrl ? {
-            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5463392464314315076" }]]
+            inline_keyboard: [[{ text: "🌍 Location", url: mapsUrl, icon_custom_emoji_id: "5463392464314315076" }]]
         } : null;
 
         try {
@@ -2873,7 +2817,7 @@ async function sendBugCommand(ctx, opts) {
                 parse_mode: "HTML",
                 reply_markup: {
                     inline_keyboard: [[
-                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778121946868749491" }
+                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778121946868749491" }
                     ]]
                 }
             }
@@ -3110,7 +3054,7 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3168,7 +3112,7 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3225,7 +3169,7 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3282,7 +3226,7 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3339,7 +3283,7 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: btnStylerPrivate.get(), icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
