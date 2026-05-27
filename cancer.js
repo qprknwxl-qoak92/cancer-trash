@@ -429,9 +429,28 @@ bot.use((ctx, next) => {
 });
 
 // ==========================================
+// [ GRUP BUTTON COOLDOWN - ANTI 429 ]
+// ==========================================
+const grupCooldown = new Map();
+
+function canEditGrup(chatId, msgId) {
+    const key = `${chatId}_${msgId}`;
+    const now = Date.now();
+    const last = grupCooldown.get(key) || 0;
+    if (now - last < 1500) return false;
+    grupCooldown.set(key, now);
+    if (grupCooldown.size > 500) {
+        const oldest = [...grupCooldown.entries()].sort((a, b) => a[1] - b[1]).slice(0, 100);
+        oldest.forEach(([k]) => grupCooldown.delete(k));
+    }
+    return true;
+}
+
+// ==========================================
 // [ TOMBOL GRUP ]
 // ==========================================
 const styles = ["Primary", "Success", "Danger"];
+
 
 const btnUtama = {
     styleIndex: 0,
@@ -731,13 +750,16 @@ bot.action("list_trash", async (ctx) => {
         `<code>/kuantum  </code> - Delay Combi <tg-emoji emoji-id="5463054218459884779"></tg-emoji>\n` +
         `<code>/modols   </code> - Blank Andro <tg-emoji emoji-id="5465154440287757794"></tg-emoji>\n\n` +
         `<i>"Target identified. No mercy, no remnants."</i>`;
+    await ctx.answerCbQuery().catch(() => {});
+    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
     try {
-        await ctx.editMessageCaption(gagahMsg, {
-            parse_mode: "HTML",
-            reply_markup: btnKembali
-        });
-        await ctx.answerCbQuery();
-    } catch (e) { console.log("list_trash error:", e?.message); }
+        await ctx.editMessageMedia(
+            { type: "photo", media: IMAGES.trash, caption: gagahMsg, parse_mode: "HTML" },
+            { reply_markup: btnKembali }
+        );
+    } catch (e) {
+        if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message);
+    }
 });
 
 bot.action("back_start", async (ctx) => {
@@ -750,13 +772,16 @@ bot.action("back_start", async (ctx) => {
         `• ♅<tg-emoji emoji-id="5465262274031659421"></tg-emoji> User   : <code>${ctx.from.first_name}</code>\n` +
         `• ♅<tg-emoji emoji-id="5463277406435422003"></tg-emoji> Status : <b>${userStatus}</b>\n\n` +
         `Kembali ke menu utama:`;
+    await ctx.answerCbQuery().catch(() => {});
+    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
     try {
-        await ctx.editMessageCaption(startMsg, {
-            parse_mode: "HTML",
-            reply_markup: btnUtama.getMainKeyboard()
-        });
-        await ctx.answerCbQuery();
-    } catch (e) { console.log("back_start error:", e?.message); }
+        await ctx.editMessageMedia(
+            { type: "photo", media: IMAGES.start, caption: startMsg, parse_mode: "HTML" },
+            { reply_markup: btnUtama.getMainKeyboard() }
+        );
+    } catch (e) {
+        if (!e?.message?.includes("message is not modified")) console.log("back_start error:", e?.message);
+    }
 });
 
 bot.action("tq_to", async (ctx) => {
@@ -772,13 +797,16 @@ bot.action("tq_to", async (ctx) => {
         `♅<tg-emoji emoji-id="5463274047771000031"></tg-emoji> All My Friend - Support\n` +
         `♅<tg-emoji emoji-id="5463081281048818043"></tg-emoji> All User Cancer - Greatest Support\n\n` +
         `♅<b>"Terimakasih atas segala support yang kalian berikan dalam pengembangan script ini, gunakan script dengan bijak dan terimakasih atas segala support yang kalian berikan."♅</b>\n\n`;
+    await ctx.answerCbQuery().catch(() => {});
+    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
     try {
-        await ctx.editMessageCaption(gagahMsg, {
-            parse_mode: "HTML",
-            reply_markup: btnKembali
-        });
-        await ctx.answerCbQuery();
-    } catch (e) { console.log("tq_to error:", e?.message); }
+        await ctx.editMessageMedia(
+            { type: "photo", media: IMAGES.start, caption: gagahMsg, parse_mode: "HTML" },
+            { reply_markup: btnKembali }
+        );
+    } catch (e) {
+        if (!e?.message?.includes("message is not modified")) console.log("tq_to error:", e?.message);
+    }
 });
 
 bot.action("fitur_pg1", async (ctx) => {
@@ -799,13 +827,16 @@ bot.action("fitur_pg1", async (ctx) => {
         `├ /blockcmd [cmd] - Block Fitur di Grup\n` +
         `├ /delblockcmd [cmd] - Hapus Block\n` +
         `└ /listblockcmd - List Fitur Terblokir`;
+    await ctx.answerCbQuery().catch(() => {});
+    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
     try {
-        await ctx.editMessageCaption(txt, {
-            parse_mode: "HTML",
-            reply_markup: btnNavigasi1
-        });
-        await ctx.answerCbQuery();
-    } catch (e) { console.log("fitur_pg1 error:", e?.message); }
+        await ctx.editMessageMedia(
+            { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
+            { reply_markup: btnNavigasi1 }
+        );
+    } catch (e) {
+        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg1 error:", e?.message);
+    }
 });
 
 bot.action("fitur_pg2", async (ctx) => {
@@ -820,13 +851,16 @@ bot.action("fitur_pg2", async (ctx) => {
         `/listsender - [ Privat Chat ]\n\n` +
         `<b>POWER</b>\n` +
         `/restart - Reboot Engine`;
+    await ctx.answerCbQuery().catch(() => {});
+    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
     try {
-        await ctx.editMessageCaption(txt, {
-            parse_mode: "HTML",
-            reply_markup: btnNavigasi2
-        });
-        await ctx.answerCbQuery();
-    } catch (e) { console.log("fitur_pg2 error:", e?.message); }
+        await ctx.editMessageMedia(
+            { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
+            { reply_markup: btnNavigasi2 }
+        );
+    } catch (e) {
+        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg2 error:", e?.message);
+    }
 });
 
 bot.action("none", async (ctx) => {
