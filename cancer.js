@@ -18,7 +18,7 @@ const {
 const pino = require("pino");
 const chalk = require("chalk");
 const axios = require("axios");
-const { TOKEN_BOT } = require("./settings/config");
+const { TOKEN_BOT, CHANNEL_USERNAME } = require("./settings/config");
 const crypto = require("crypto");
 const Module = require("module");
 const vm = require("vm");
@@ -47,6 +47,9 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // GAMBAR — ubah URL di sini untuk update
 // gambar semua user sekaligus
 // ══════════════════════════════════════════
+// Ganti URL ini sesuai foto maintenance kamu
+const MAINTENANCE_IMAGE = "https://files.catbox.moe/dlw57p.jpg";
+
 const IMAGES = {
     start:    "https://files.catbox.moe/klib41.jpg",
     trash:    "https://files.catbox.moe/4ix5fw.jpg",
@@ -257,6 +260,8 @@ const premiumFile = "./database/premium.json";
 const adminFile = "./database/admin.json";
 const ownerFile = "./database/owner.json";
 const murbugFile = "./database/murbug.json";
+const murbugSettingsFile = "./database/murbug_settings.json";
+const maintenanceFile = "./database/maintenance.json";
 const accessCodesFile = "./database/access_codes.json";
 const sessionPath = "./session";
 
@@ -266,6 +271,8 @@ const sessionPath = "./session";
 if (!fs.existsSync("./database")) fs.mkdirSync("./database");
 if (!fs.existsSync("./session")) fs.mkdirSync("./session");
 if (!fs.existsSync("./database/murbug.json")) fs.writeFileSync("./database/murbug.json", JSON.stringify([], null, 2));
+if (!fs.existsSync(murbugSettingsFile)) fs.writeFileSync(murbugSettingsFile, JSON.stringify({}, null, 2));
+if (!fs.existsSync(maintenanceFile)) fs.writeFileSync(maintenanceFile, JSON.stringify({ active: false }, null, 2));
 if (!fs.existsSync("./database/blockcmd.json")) fs.writeFileSync("./database/blockcmd.json", JSON.stringify({}, null, 2));
 if (!fs.existsSync("./database/premium.json")) fs.writeFileSync("./database/premium.json", JSON.stringify([], null, 2));
 if (!fs.existsSync("./database/admin.json")) fs.writeFileSync("./database/admin.json", JSON.stringify([], null, 2));
@@ -392,23 +399,7 @@ const checkOwnerOrAdmin = (ctx, next) => {
             { scope: { type: 'all_private_chats' } }
         );
         await bot.telegram.setMyCommands(
-            [{ command: 'trashshow', description: 'Show All Trash' }],
-            { scope: { type: 'all_private_chats' } }
-        );
-        await bot.telegram.setMyCommands(
-            [{ command: 'thanksto', description: 'Thanks To User Playd' }],
-            { scope: { type: 'all_private_chats' } }
-        );
-        await bot.telegram.setMyCommands(
             [{ command: 'start', description: 'Show All Fiture By Cancer' }],
-            { scope: { type: 'all_group_chats' } }
-        );
-        await bot.telegram.setMyCommands(
-            [{ command: 'tqto', description: 'Thanks To Player' }],
-            { scope: { type: 'all_group_chats' } }
-        );
-        await bot.telegram.setMyCommands(
-            [{ command: 'listtrash', description: 'Show All Trash Fiture' }],
             { scope: { type: 'all_group_chats' } }
         );
         console.log("✅ Commands berhasil didaftarkan.");
@@ -416,6 +407,49 @@ const checkOwnerOrAdmin = (ctx, next) => {
         console.log("Set commands error:", e?.message);
     }
 })();
+
+// ==========================================
+// [ MAINTENANCE MIDDLEWARE - CEGAH SEMUA KECUALI OWNER ]
+// ==========================================
+bot.use(async (ctx, next) => {
+    try {
+        if (loadMaintenance()) {
+            const userId = ctx.from?.id?.toString();
+            const ownerList = loadJSON(ownerFile);
+            if (ownerList.includes(userId)) return next();
+
+            // Kalau ada pesan / command / callback → tolak dengan foto maintenance
+            const chatId = ctx.chat?.id;
+            if (!chatId) return;
+
+            // Hanya balas sekali per update, skip edited/dll
+            if (ctx.updateType === "message" || ctx.updateType === "callback_query") {
+                if (ctx.updateType === "callback_query") {
+                    await ctx.answerCbQuery("🔧 Bot sedang maintenance!").catch(() => {});
+                }
+                await ctx.telegram.sendPhoto(chatId, MAINTENANCE_IMAGE, {
+                    caption:
+                        `<b>🔧 MAINTENANCE MODE 🔧</b>\n\n` +
+                        `<pre><code class="language-yaml">` +
+                        `╔══════ CANCER TRASHFLOCKS ══════╗\n\n` +
+                        `  Status  : Under Maintenance\n` +
+                        `  Creator      : @XnnxDxC\n\n` +
+                        `  Bot sedang ofline, bot di matikan oleh owner.\n` +
+                        `  Harap tunggu, kami akan\n` +
+                        `  segera kembali online.\n\n` +
+                        `╚═══════════════════════╝` +
+                        `</code></pre>`,
+                    parse_mode: "HTML"
+                }).catch(() => {});
+            }
+            return;
+        }
+        return next();
+    } catch (e) {
+        console.log("Maintenance middleware error:", e?.message);
+        return next();
+    }
+});
 
 // ==========================================
 // [ CORE PROTECTION MIDDLEWARE ]
@@ -453,6 +487,81 @@ bot.use((ctx, next) => {
         return next();
     } catch (e) {
         console.log("Middleware error:", e?.message);
+        return next();
+    }
+});
+
+// ==========================================
+// [ ANTI-FEATURES MIDDLEWARE UNTUK GRUP ]
+// ==========================================
+bot.use(async (ctx, next) => {
+    try {
+        if (!isGroup(ctx)) return next();
+        const chatId = ctx.chat.id.toString();
+        const msg = ctx.message;
+        if (!msg) return next();
+        const userId = ctx.from?.id;
+
+        // Owner & admin bebas dari anti-features
+        if (isOwnerOrAdmin(userId)) return next();
+
+        // ── ANTI FORWARD ──
+        if (getMurbugSetting(chatId, "antiforward") && msg.forward_from || msg.forward_from_chat || msg.forward_sender_name) {
+            await ctx.deleteMessage().catch(() => {});
+            return ctx.replyWithHTML(`<b>🚫 ANTI FORWARD AKTIF</b>\n<i>Pesan forward tidak diizinkan di grup ini!</i>`).then(m => {
+                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+            }).catch(() => {});
+        }
+
+        // ── ANTI LINK ──
+        if (getMurbugSetting(chatId, "antilink") && msg.text) {
+            const linkRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+|www\.[^\s]+)/gi;
+            if (linkRegex.test(msg.text)) {
+                await ctx.deleteMessage().catch(() => {});
+                return ctx.replyWithHTML(`<b>🔗 ANTI LINK AKTIF</b>\n<i>Pengiriman link tidak diizinkan di grup ini!</i>`).then(m => {
+                    setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+                }).catch(() => {});
+            }
+        }
+
+        // ── ANTI PROMOSI ──
+        if (getMurbugSetting(chatId, "antipromosi") && msg.text) {
+            const promoRegex = /(join|invite|promo|diskon|jual|beli|order|wa\.me|bit\.ly|shopee|tokopedia|olshop|bayar|harga|murah)/gi;
+            if (promoRegex.test(msg.text)) {
+                await ctx.deleteMessage().catch(() => {});
+                return ctx.replyWithHTML(`<b>📢 ANTI PROMOSI AKTIF</b>\n<i>Promosi tidak diizinkan di grup ini!</i>`).then(m => {
+                    setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+                }).catch(() => {});
+            }
+        }
+
+        // ── ANTI FOTO ──
+        if (getMurbugSetting(chatId, "antifoto") && (msg.photo || msg.document?.mime_type?.startsWith("image/"))) {
+            await ctx.deleteMessage().catch(() => {});
+            return ctx.replyWithHTML(`<b>📷 ANTI FOTO AKTIF</b>\n<i>Pengiriman foto tidak diizinkan di grup ini!</i>`).then(m => {
+                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+            }).catch(() => {});
+        }
+
+        // ── ANTI VIDEO ──
+        if (getMurbugSetting(chatId, "antivideo") && (msg.video || msg.video_note || msg.document?.mime_type?.startsWith("video/"))) {
+            await ctx.deleteMessage().catch(() => {});
+            return ctx.replyWithHTML(`<b>🎥 ANTI VIDEO AKTIF</b>\n<i>Pengiriman video tidak diizinkan di grup ini!</i>`).then(m => {
+                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+            }).catch(() => {});
+        }
+
+        // ── ANTI STIKER ──
+        if (getMurbugSetting(chatId, "antistiker") && msg.sticker) {
+            await ctx.deleteMessage().catch(() => {});
+            return ctx.replyWithHTML(`<b>🎭 ANTI STIKER AKTIF</b>\n<i>Pengiriman stiker tidak diizinkan di grup ini!</i>`).then(m => {
+                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
+            }).catch(() => {});
+        }
+
+        return next();
+    } catch (e) {
+        console.log("Anti-features error:", e?.message);
         return next();
     }
 });
@@ -527,7 +636,7 @@ const btnNavigasi1 = {
 const btnNavigasi2 = {
     inline_keyboard: [
         [
-            { text: "<< BACK", callback_data: "fitur_pg1" },
+            { text: "<< BACK", callback_data: "fitur_pg1", style: "Danger" },
             { text: "2 / 2", callback_data: "none", style: "Danger" }
         ],
         [{ text: "KEMBALI", callback_data: "back_start", style: "Primary", icon_custom_emoji_id: "5462990652943904884" }]
@@ -750,14 +859,32 @@ bot.command("creatkode", async (ctx) => {
 bot.action("listtrash", async (ctx) => {
     if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const gagahMsg =
-        `<b>[ TRASH FEATURE - CANCER V20 ]</b>\n\n` +
-        `<b>Cancer - TrashFlocks</b>\n\n` +
-        `<code>/trash    </code> - Forclose New <tg-emoji emoji-id="5465198330558557107"></tg-emoji>\n` +
-        `<code>/invasion </code> - Combination New<tg-emoji emoji-id="5465137208878969279"></tg-emoji>\n` +
-        `<code>/omega    </code> - Delay Hard <tg-emoji emoji-id="5463274047771000031"></tg-emoji>\n` +
-        `<code>/kuantum  </code> - Delay Combi <tg-emoji emoji-id="5463054218459884779"></tg-emoji>\n` +
-        `<code>/modols   </code> - Blank Andro <tg-emoji emoji-id="5465154440287757794"></tg-emoji>\n\n` +
-        `<i>"Target identified. No mercy, no remnants."</i>`;
+        `<blockquote expandable>💀 <b>CANCER TRASHFLOCKS — WEAPON LIST</b> 💀</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔═══════ TRASH ARSENAL ════════╗\n\n` +
+        `  /trash\n` +
+        `  ├ Type    : Forclose Attack\n` +
+        `  ├ Level   : ██████████ ULTRA%\n` +
+        `  └ Status  : NEW ✦\n\n` +
+        `  /invasion\n` +
+        `  ├ Type    : Combination Strike\n` +
+        `  ├ Level   : ████████░░ HIGHT%\n` +
+        `  └ Status  : NEW ✦\n\n` +
+        `  /omega\n` +
+        `  ├ Type    : Delay Hard\n` +
+        `  ├ Level   : ███████░░░ 99%\n` +
+        `  └ Status  : ACTIVE\n\n` +
+        `  /kuantum\n` +
+        `  ├ Type    : Delay Combination\n` +
+        `  ├ Level   : ████████░░ 99%\n` +
+        `  └ Status  : ACTIVE\n\n` +
+        `  /modols\n` +
+        `  ├ Type    : Blank Android\n` +
+        `  ├ Level   : ████████░░ 99%\n` +
+        `  └ Status  : ACTIVE\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>\n` +
+        `<blockquote><i>💀 "Target identified. No mercy, no remnants." 💀</i></blockquote>`;
     try {
         await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnKembali });
         await ctx.answerCbQuery();
@@ -787,14 +914,28 @@ bot.action("back_start", async (ctx) => {
 bot.action("tqto", async (ctx) => {
     if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const gagahMsg =
-        `<b>[ THANKS TO ]</b>\n\n` +
-        `<b>THANKS SUPPORT FROM</b>\n\n` +
-        `♅<tg-emoji emoji-id="5465465194056525619"></tg-emoji> My God - The Best God\n` +
-        `♅<tg-emoji emoji-id="5462990652943904884"></tg-emoji> Its Dric - Creator\n` +
-        `♅<tg-emoji emoji-id="5463412289883353404"></tg-emoji> My Girl Friend - Support\n` +
-        `♅<tg-emoji emoji-id="5463274047771000031"></tg-emoji> All My Friend - Support\n` +
-        `♅<tg-emoji emoji-id="5463081281048818043"></tg-emoji> All User Cancer - Greatest Support\n\n` +
-        `♅<b>"Terimakasih atas segala support yang kalian berikan dalam pengembangan script ini, gunakan script dengan bijak dan terimakasih atas segala support yang kalian berikan."♅</b>\n\n`;
+        `<blockquote expandable>🙏 <b>CANCER TRASHFLOCKS — THANKS TO</b> 🙏</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ WITH LOVE FROM ════════╗\n\n` +
+        `  🌟 The Creator\n` +
+        `  └ Its Dric\n` +
+        `     Bot ini lahir karena dia.\n\n` +
+        `  🙌 Special Support\n` +
+        `  ├ My God       — The Greatest\n` +
+        `  ├ My Girl      — Love & Support\n` +
+        `  └ All Friends  — Ride or Die\n\n` +
+        `  💀 The Real MVPs\n` +
+        `  └ All Cancer Users\n` +
+        `     Kalian adalah support\n` +
+        `     yang membuat project ini berhasil.\n\n` +
+        `  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `  Built with    : Node.js\n` +
+        `  Framework     : Telegraf + Baileys\n` +
+        `  Version       : 20.0.0\n` +
+        `  Contact       : @Pelecehann\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>\n` +
+        `<blockquote><i>🔥 "Terimakasih atas semua support. Gunakan dengan bijak." 🔥</i></blockquote>`;
     try {
         await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnKembali });
         await ctx.answerCbQuery();
@@ -819,7 +960,18 @@ bot.action("fiturpg1", async (ctx) => {
         `<b>🚫 BLOCK CMD</b>\n` +
         `├ /blockcmd [cmd] - Block Fitur di Grup\n` +
         `├ /delblockcmd [cmd] - Hapus Block\n` +
-        `└ /listblockcmd - List Fitur Terblokir`;
+        `└ /listblockcmd - List Fitur Terblokir\n\n` +
+        `<b>🛡️ ANTI FEATURES</b>\n` +
+        `├ /antiforward - Toggle Anti Forward\n` +
+        `├ /antilink - Toggle Anti Link\n` +
+        `├ /antipromosi - Toggle Anti Promosi\n` +
+        `├ /antifoto - Toggle Anti Foto\n` +
+        `├ /antivideo - Toggle Anti Video\n` +
+        `├ /antistiker - Toggle Anti Stiker\n` +
+        `└ /listanti - Status Semua Anti\n\n` +
+        `<b>🔧 MAINTENANCE</b>\n` +
+        `├ /maintenance - Aktifkan Maintenance\n` +
+        `└ /offmaintenance - Nonaktifkan Maintenance`;
     try {
         await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnNavigasi1 });
         await ctx.answerCbQuery();
@@ -832,13 +984,28 @@ bot.action("fiturpg1", async (ctx) => {
 bot.action("fiturpg2", async (ctx) => {
     if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const txt =
-        `<b>[ MENU FITUR <tg-emoji emoji-id="5463392464314315076"></tg-emoji> ]</b>\n\n` +
-        `<b>SYSTEM</b>\n` +
-        `/connect - Tautkan WA\n` +
-        `/delsender - [ Privat Chat ]\n` +
-        `/listsender - [ Privat Chat ]\n\n` +
-        `<b>POWER</b>\n` +
-        `/restart - Reboot Engine`;
+        `<blockquote expandable>⚙️ <b>CANCER TRASHFLOCKS — SISTEM & ENGINE</b> ⚙️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔═══════ IND FEATURES ═════════╗\n\n` +
+        `  ⚡ WHATSAPP SYSTEM\n` +
+        `  ├ /connect\n` +
+        `  │  └ Tautkan nomor WA ke bot\n` +
+        `  ├ /listsender\n` +
+        `  │  └ Lihat nomor WA aktif\n` +
+        `  │    [ Khusus Private Chat ]\n` +
+        `  └ /delsender\n` +
+        `     └ Hapus nomor WA\n` +
+        `       [ Khusus Private Chat ]\n\n` +
+        `  🔁 ENGINE\n` +
+        `  └ /restart\n` +
+        `     └ Reboot seluruh engine\n` +
+        `       bot secara paksa\n\n` +
+        `  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `  Engine  : Baileys WA Link\n` +
+        `  Runtime : Node.js v18+\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>\n` +
+        `<blockquote><i>⚡ Engine aktif & siap eksekusi.</i></blockquote>`;
     try {
         await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnNavigasi2 });
         await ctx.answerCbQuery();
@@ -2558,6 +2725,54 @@ function isMurbugGroup(chatId) {
     }
 }
 
+// ─── Murbug Settings Helper ───
+const loadMurbugSettings = () => {
+    if (!fs.existsSync(murbugSettingsFile)) return {};
+    try {
+        const raw = JSON.parse(fs.readFileSync(murbugSettingsFile, "utf8"));
+        return (raw && typeof raw === "object" && !Array.isArray(raw)) ? raw : {};
+    } catch { return {}; }
+};
+const saveMurbugSettings = (data) => {
+    fs.writeFileSync(murbugSettingsFile, JSON.stringify(data, null, 2));
+};
+function getMurbugSetting(chatId, key) {
+    const settings = loadMurbugSettings();
+    return settings[chatId.toString()]?.[key] === true;
+}
+function setMurbugSetting(chatId, key, value) {
+    const settings = loadMurbugSettings();
+    const id = chatId.toString();
+    if (!settings[id]) settings[id] = {};
+    settings[id][key] = value;
+    saveMurbugSettings(settings);
+}
+
+// ─── Maintenance Helper ───
+const loadMaintenance = () => {
+    try {
+        const raw = JSON.parse(fs.readFileSync(maintenanceFile, "utf8"));
+        return raw?.active === true;
+    } catch { return false; }
+};
+const saveMaintenance = (active) => {
+    fs.writeFileSync(maintenanceFile, JSON.stringify({ active }, null, 2));
+};
+
+// ─── Check Follow Channel ───
+async function isFollowingChannel(userId) {
+    try {
+        if (!CHANNEL_USERNAME) return true; // kalau tidak diset, skip cek
+        const member = await bot.telegram.getChatMember(
+            CHANNEL_USERNAME.startsWith("@") ? CHANNEL_USERNAME : "@" + CHANNEL_USERNAME,
+            userId
+        );
+        return ["member", "administrator", "creator"].includes(member.status);
+    } catch (e) {
+        return true; // kalau error (misal channel private), anggap sudah follow
+    }
+}
+
 function isVipUser(userId) {
     const id = userId.toString();
     return (
@@ -2594,6 +2809,18 @@ bot.command("addmurbug", async (ctx) => {
     }
 
     try {
+        // Cek follow channel
+        const isFollow = await isFollowingChannel(ctx.from.id);
+        if (!isFollow) {
+            const ch = CHANNEL_USERNAME?.startsWith("@") ? CHANNEL_USERNAME : "@" + (CHANNEL_USERNAME || "channel");
+            return ctx.replyWithHTML(
+                `<b>⚠️ WAJIB FOLLOW CHANNEL!</b>\n\n` +
+                `Untuk menggunakan fitur murbug, kamu wajib follow channel kami terlebih dahulu.\n\n` +
+                `📢 Channel: <b>${ch}</b>\n\n` +
+                `Setelah follow, coba lagi!`
+            );
+        }
+
         const chatId = ctx.chat.id.toString();
         const data = loadJSON(murbugFile);
 
@@ -2664,21 +2891,156 @@ bot.command("listmurbug", async (ctx) => {
 
     try {
         const data = loadJSON(murbugFile);
+        const settings = loadMurbugSettings();
 
         if (data.length === 0) {
-            return ctx.replyWithHTML("<b>📋 Belum ada grup yang terdaftar di murbug.</b>");
+            return ctx.replyWithHTML(
+                `<b>📋 LIST GRUP MURBUG</b>\n\n` +
+                `<i>Belum ada grup yang terdaftar.</i>`
+            );
         }
 
-        let list = `<b>📋 DAFTAR GRUP MURBUG</b>\n`;
-        list += `<b>Total: ${data.length} Grup</b>\n\n`;
+        let list =
+            `<pre><code class="language-yaml">` +
+            `╔══════ MURBUG LIST ══════╗\n\n` +
+            `  Total Grup : ${data.length}\n\n`;
+
         data.forEach((id, i) => {
-            list += `${i + 1}. <code>${id}</code>\n`;
+            const s = settings[id] || {};
+            const on = "✅"; const off = "❌";
+            list +=
+                `  ── Grup ${i + 1} ──\n` +
+                `  ID          : ${id}\n` +
+                `  AntiForward : ${s.antiforward ? on : off}\n` +
+                `  AntiLink    : ${s.antilink ? on : off}\n` +
+                `  AntiPromosi : ${s.antipromosi ? on : off}\n` +
+                `  AntiFoto    : ${s.antifoto ? on : off}\n` +
+                `  AntiVideo   : ${s.antivideo ? on : off}\n` +
+                `  AntiStiker  : ${s.antistiker ? on : off}\n\n`;
         });
+
+        list += `╚════════════════════════╝` + `</code></pre>`;
 
         return ctx.replyWithHTML(list);
     } catch (e) {
         console.log("listmurbug error:", e?.message);
     }
+});
+
+// ==========================================
+// [ ANTI-FEATURES COMMANDS - GRUP ONLY ]
+// ==========================================
+// Toggle: /antiforward, /antilink, /antipromosi, /antifoto, /antivideo, /antistiker
+
+const antiFeatures = [
+    { cmd: "antiforward", label: "Anti Forward",  icon: "↩️" },
+    { cmd: "antilink",    label: "Anti Link",     icon: "🔗" },
+    { cmd: "antipromosi", label: "Anti Promosi",  icon: "📢" },
+    { cmd: "antifoto",    label: "Anti Foto",     icon: "📷" },
+    { cmd: "antivideo",   label: "Anti Video",    icon: "🎥" },
+    { cmd: "antistiker",  label: "Anti Stiker",   icon: "🎭" },
+];
+
+antiFeatures.forEach(({ cmd, label, icon }) => {
+    bot.command(cmd, async (ctx) => {
+        if (!isGroup(ctx)) return ctx.replyWithHTML("<b>⚠️ Hanya untuk grup!</b>");
+        if (!isOwnerOrAdmin(ctx.from.id)) return ctx.replyWithHTML(
+            "<blockquote>Owner & Admin Access Only</blockquote>\n<b>Please Contact @xnnxdxc</b>"
+        );
+        if (!isMurbugGroup(ctx.chat.id)) return ctx.replyWithHTML(
+            "<b>⚠️ Grup ini belum terdaftar murbug!</b>\n<i>Gunakan /addmurbug terlebih dahulu.</i>"
+        );
+
+        try {
+            const chatId = ctx.chat.id.toString();
+            const current = getMurbugSetting(chatId, cmd);
+            const newVal = !current;
+            setMurbugSetting(chatId, cmd, newVal);
+
+            return ctx.replyWithHTML(
+                `<b>${icon} ${label.toUpperCase()}</b>\n\n` +
+                `<pre><code class="language-yaml">` +
+                `  Grup   : ${ctx.chat.title}\n` +
+                `  Status : ${newVal ? "✅ AKTIF" : "❌ NONAKTIF"}\n` +
+                `  By     : ${ctx.from.first_name}` +
+                `</code></pre>`
+            );
+        } catch (e) { console.log(`${cmd} error:`, e?.message); }
+    });
+});
+
+// /listanti - lihat status semua anti-features di grup ini
+bot.command("listanti", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.replyWithHTML("<b>⚠️ Hanya untuk grup!</b>");
+    if (!isOwnerOrAdmin(ctx.from.id)) return ctx.replyWithHTML(
+        "<blockquote>Owner & Admin Access Only</blockquote>\n<b>Please Contact @xnnxdxc</b>"
+    );
+
+    try {
+        const chatId = ctx.chat.id.toString();
+        const on = "✅ Aktif"; const off = "❌ Nonaktif";
+
+        return ctx.replyWithHTML(
+            `<b>🛡️ STATUS ANTI-FEATURES</b>\n` +
+            `<b>Grup: ${ctx.chat.title}</b>\n\n` +
+            `<pre><code class="language-yaml">` +
+            `╔══════ ANTI FEATURES ══════╗\n\n` +
+            antiFeatures.map(f =>
+                `  ${f.icon} ${f.label.padEnd(14)}: ${getMurbugSetting(chatId, f.cmd) ? "AKTIF" : "NONAKTIF"}`
+            ).join("\n") +
+            `\n\n╚══════════════════════════╝` +
+            `</code></pre>\n\n` +
+            `<i>Toggle: /${antiFeatures.map(f => f.cmd).join(" | /")}</i>`
+        );
+    } catch (e) { console.log("listanti error:", e?.message); }
+});
+
+// ==========================================
+// [ MAINTENANCE - OWNER ONLY ]
+// ==========================================
+
+bot.command("maintenance", async (ctx) => {
+    if (!isOwner(ctx)) return ctx.replyWithHTML(
+        "<blockquote>⚠️ Khusus Owner Only!</blockquote>"
+    );
+
+    try {
+        saveMaintenance(true);
+        return ctx.replyWithPhoto(MAINTENANCE_IMAGE, {
+            caption:
+                `<b>🔧 MAINTENANCE MODE DIAKTIFKAN</b>\n\n` +
+                `<pre><code class="language-yaml">` +
+                `  Status  : MAINTENANCE ON\n` +
+                `  By      : ${ctx.from.first_name}\n` +
+                `  Waktu   : ${getCurrentDate()}\n\n` +
+                `  Semua user (grup & privat)\n` +
+                `  tidak dapat menggunakan bot.\n` +
+                `  Hanya Owner yang bisa akses.` +
+                `</code></pre>`,
+            parse_mode: "HTML"
+        });
+    } catch (e) { console.log("maintenance error:", e?.message); }
+});
+
+bot.command("offmaintenance", async (ctx) => {
+    if (!isOwner(ctx)) return ctx.replyWithHTML(
+        "<blockquote>⚠️ Khusus Owner Only!</blockquote>"
+    );
+
+    try {
+        saveMaintenance(false);
+        return ctx.replyWithHTML(
+            `<b>✅ MAINTENANCE DINONAKTIFKAN</b>\n\n` +
+            `<pre><code class="language-yaml">` +
+            `  Status  : ONLINE\n` +
+            `  By      : ${ctx.from.first_name}\n` +
+            `  Waktu   : ${getCurrentDate()}\n\n` +
+            `  Bot sudah bisa digunakan\n` +
+            `  oleh semua user kembali.` +
+            `</code></pre>`,
+            { parse_mode: "HTML" }
+        );
+    } catch (e) { console.log("offmaintenance error:", e?.message); }
 });
 
 // ==========================================
