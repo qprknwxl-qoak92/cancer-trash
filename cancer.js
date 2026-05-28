@@ -306,7 +306,20 @@ let adminUsers = loadJSON(adminFile);
 let premiumUsers = loadJSON(premiumFile);
 let murbugGroups = new Set(loadJSON(murbugFile));
 const blockcmdFile = "./database/blockcmd.json";
-let blockcmdData = loadJSON(blockcmdFile) || {};
+
+const loadBlockcmd = () => {
+    if (!fs.existsSync(blockcmdFile)) return {};
+    try {
+        const raw = JSON.parse(fs.readFileSync(blockcmdFile, "utf8"));
+        return (raw && typeof raw === "object" && !Array.isArray(raw)) ? raw : {};
+    } catch { return {}; }
+};
+const saveBlockcmd = (data) => {
+    if (!fs.existsSync("./database")) fs.mkdirSync("./database", { recursive: true });
+    fs.writeFileSync(blockcmdFile, JSON.stringify(data, null, 2));
+};
+
+let blockcmdData = loadBlockcmd();
 
 // ==========================================
 // [ ASSETS & RUNTIME ]
@@ -375,11 +388,27 @@ const checkOwnerOrAdmin = (ctx, next) => {
 (async () => {
     try {
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
+            [{ command: 'start', description: 'Show All Fiture' }],
             { scope: { type: 'all_private_chats' } }
         );
         await bot.telegram.setMyCommands(
-            [{ command: 'start', description: 'Creat By @XnnxDxC' }],
+            [{ command: 'trashshow', description: 'Show All Trash' }],
+            { scope: { type: 'all_private_chats' } }
+        );
+        await bot.telegram.setMyCommands(
+            [{ command: 'thanksto', description: 'Thanks To User Playd' }],
+            { scope: { type: 'all_private_chats' } }
+        );
+        await bot.telegram.setMyCommands(
+            [{ command: 'start', description: 'Show All Fiture By Cancer' }],
+            { scope: { type: 'all_group_chats' } }
+        );
+        await bot.telegram.setMyCommands(
+            [{ command: 'tqto', description: 'Thanks To Player' }],
+            { scope: { type: 'all_group_chats' } }
+        );
+        await bot.telegram.setMyCommands(
+            [{ command: 'listtrash', description: 'Show All Trash Fiture' }],
             { scope: { type: 'all_group_chats' } }
         );
         console.log("✅ Commands berhasil didaftarkan.");
@@ -429,46 +458,6 @@ bot.use((ctx, next) => {
 });
 
 // ==========================================
-// [ GRUP BUTTON COOLDOWN - ANTI 429 ]
-// ==========================================
-const grupCooldown = new Map();
-
-function canEditGrup(chatId, msgId) {
-    const key = `${chatId}_${msgId}`;
-    const now = Date.now();
-    const last = grupCooldown.get(key) || 0;
-    if (now - last < 500) return false;
-    grupCooldown.set(key, now);
-    if (grupCooldown.size > 500) {
-        const oldest = [...grupCooldown.entries()].sort((a, b) => a[1] - b[1]).slice(0, 100);
-        oldest.forEach(([k]) => grupCooldown.delete(k));
-    }
-    return true;
-}
-
-// ==========================================
-// [ RETRY HELPER - ANTI 429 ]
-// ==========================================
-async function safeEdit(fn, maxRetries = 4) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            return await fn();
-        } catch (err) {
-            const msg = err?.message || "";
-            if (msg.includes("message is not modified")) return;
-            const match = msg.match(/retry after (\d+)/i);
-            if (match) {
-                const wait = (parseInt(match[1]) + 1) * 1000;
-                console.log(`[RATE LIMIT] Nunggu ${wait/1000}s sebelum retry...`);
-                await sleep(wait);
-            } else {
-                throw err;
-            }
-        }
-    }
-}
-
-// ==========================================
 // [ TOMBOL GRUP ]
 // ==========================================
 const styles = ["Primary", "Success", "Danger"];
@@ -483,12 +472,12 @@ const btnUtama = {
         return {
             inline_keyboard: [
                 [
-                    { text: "LIST TRASH", callback_data: "list_trash", style: style, icon_custom_emoji_id: "5465225015190367274" },
-                    { text: "SUP FITURE", callback_data: "fitur_pg1", style: style, icon_custom_emoji_id: "5465262274031659421" }
+                    { text: "LIST TRASH", callback_data: "listtrash", style: style, icon_custom_emoji_id: "5465225015190367274" },
+                    { text: "SUP FITURE", callback_data: "fiturpg1", style: style, icon_custom_emoji_id: "5465262274031659421" }
                 ],
                 [
-                    { text: "IND FITURE", callback_data: "fitur_pg2", style: style, icon_custom_emoji_id: "5463121572137022242" },
-                    { text: "THANKS TO", callback_data: "tq_to", style: style, icon_custom_emoji_id: "5463412289883353404" },
+                    { text: "IND FITURE", callback_data: "fiturpg2", style: style, icon_custom_emoji_id: "5463121572137022242" },
+                    { text: "THANKS TO", callback_data: "tqto", style: style, icon_custom_emoji_id: "5463412289883353404" },
                 ],
                 [
                     { text: "CREATOR", url: "https://t.me/xnnxdxc", style: style, icon_custom_emoji_id: "5463156928307801722" }
@@ -521,7 +510,7 @@ function getPrivateMainKeyboard() {
 
 const btnKembali = {
     inline_keyboard: [
-        [{ text: "BACK TO START", callback_data: "back_start" }]
+        [{ text: "BACK TO START", callback_data: "back_start", style: "Primary" }]
     ]
 };
 
@@ -593,15 +582,14 @@ bot.start(async (ctx) => {
             `<blockquote><i>Pilih menu di bawah untuk eksekusi.</i></blockquote>`;
 
         try {
-            await safeEdit(() => ctx.replyWithPhoto(
+            await ctx.replyWithPhoto(
                 IMAGES.start,
                 {
                     caption: startMsg,
                     parse_mode: "HTML",
                     reply_markup: btnUtama.getMainKeyboard()
                 }
-            ));
-
+            );
         } catch (e) {
             console.log("Start grup error:", e?.message);
         }
@@ -759,10 +747,8 @@ bot.command("creatkode", async (ctx) => {
 // ==========================================
 // [ ACTIONS GRUP ONLY ]
 // ==========================================
-bot.action("list_trash", async (ctx) => {
-    if (!isGroup(ctx)) {
-        return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
-    }
+bot.action("listtrash", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const gagahMsg =
         `<b>[ TRASH FEATURE - CANCER V20 ]</b>\n\n` +
         `<b>Cancer - TrashFlocks</b>\n\n` +
@@ -772,36 +758,34 @@ bot.action("list_trash", async (ctx) => {
         `<code>/kuantum  </code> - Delay Combi <tg-emoji emoji-id="5463054218459884779"></tg-emoji>\n` +
         `<code>/modols   </code> - Blank Andro <tg-emoji emoji-id="5465154440287757794"></tg-emoji>\n\n` +
         `<i>"Target identified. No mercy, no remnants."</i>`;
-    await ctx.answerCbQuery().catch(() => {});
-    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    await safeEdit(() => ctx.editMessageMedia(
-        { type: "photo", media: IMAGES.trash, caption: gagahMsg, parse_mode: "HTML" },
-        { reply_markup: btnKembali }
-    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message); });
+    try {
+        await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnKembali });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message);
+    }
 });
 
 bot.action("back_start", async (ctx) => {
-    if (!isGroup(ctx)) {
-        return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
-    }
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const userStatus = getStatus(ctx.from.id);
     const startMsg =
         `<b>[ CANCER V20 ENGINE ]</b>\n\n` +
         `• ♅<tg-emoji emoji-id="5465262274031659421"></tg-emoji> User   : <code>${ctx.from.first_name}</code>\n` +
         `• ♅<tg-emoji emoji-id="5463277406435422003"></tg-emoji> Status : <b>${userStatus}</b>\n\n` +
         `Kembali ke menu utama:`;
-    await ctx.answerCbQuery().catch(() => {});
-    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    await safeEdit(() => ctx.editMessageMedia(
-        { type: "photo", media: IMAGES.start, caption: startMsg, parse_mode: "HTML" },
-        { reply_markup: btnUtama.getMainKeyboard() }
-    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("back_start error:", e?.message); });
+    try {
+        await ctx.editMessageCaption(startMsg, { parse_mode: "HTML", reply_markup: btnUtama.getMainKeyboard() });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("back_start error:", e?.message);
+    }
 });
 
-bot.action("tq_to", async (ctx) => {
-    if (!isGroup(ctx)) {
-        return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
-    }
+bot.action("tqto", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const gagahMsg =
         `<b>[ THANKS TO ]</b>\n\n` +
         `<b>THANKS SUPPORT FROM</b>\n\n` +
@@ -811,18 +795,17 @@ bot.action("tq_to", async (ctx) => {
         `♅<tg-emoji emoji-id="5463274047771000031"></tg-emoji> All My Friend - Support\n` +
         `♅<tg-emoji emoji-id="5463081281048818043"></tg-emoji> All User Cancer - Greatest Support\n\n` +
         `♅<b>"Terimakasih atas segala support yang kalian berikan dalam pengembangan script ini, gunakan script dengan bijak dan terimakasih atas segala support yang kalian berikan."♅</b>\n\n`;
-    await ctx.answerCbQuery().catch(() => {});
-    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    await safeEdit(() => ctx.editMessageMedia(
-        { type: "photo", media: IMAGES.start, caption: gagahMsg, parse_mode: "HTML" },
-        { reply_markup: btnKembali }
-    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("tq_to error:", e?.message); });
+    try {
+        await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnKembali });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("tqto error:", e?.message);
+    }
 });
 
-bot.action("fitur_pg1", async (ctx) => {
-    if (!isGroup(ctx)) {
-        return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
-    }
+bot.action("fiturpg1", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const txt =
         `<b>[ MENU FITUR <tg-emoji emoji-id="5463081281048818043"></tg-emoji> ]</b>\n\n` +
         `<b>👑 AKSES</b>\n` +
@@ -837,18 +820,17 @@ bot.action("fitur_pg1", async (ctx) => {
         `├ /blockcmd [cmd] - Block Fitur di Grup\n` +
         `├ /delblockcmd [cmd] - Hapus Block\n` +
         `└ /listblockcmd - List Fitur Terblokir`;
-    await ctx.answerCbQuery().catch(() => {});
-    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    await safeEdit(() => ctx.editMessageMedia(
-        { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
-        { reply_markup: btnNavigasi1 }
-    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("fitur_pg1 error:", e?.message); });
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnNavigasi1 });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg1 error:", e?.message);
+    }
 });
 
-bot.action("fitur_pg2", async (ctx) => {
-    if (!isGroup(ctx)) {
-        return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
-    }
+bot.action("fiturpg2", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const txt =
         `<b>[ MENU FITUR <tg-emoji emoji-id="5463392464314315076"></tg-emoji> ]</b>\n\n` +
         `<b>SYSTEM</b>\n` +
@@ -857,12 +839,13 @@ bot.action("fitur_pg2", async (ctx) => {
         `/listsender - [ Privat Chat ]\n\n` +
         `<b>POWER</b>\n` +
         `/restart - Reboot Engine`;
-    await ctx.answerCbQuery().catch(() => {});
-    if (!canEditGrup(ctx.chat.id, ctx.callbackQuery.message?.message_id)) return;
-    await safeEdit(() => ctx.editMessageMedia(
-        { type: "photo", media: IMAGES.start, caption: txt, parse_mode: "HTML" },
-        { reply_markup: btnNavigasi2 }
-    )).catch(e => { if (!e?.message?.includes("message is not modified")) console.log("fitur_pg2 error:", e?.message); });
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnNavigasi2 });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("fitur_pg2 error:", e?.message);
+    }
 });
 
 bot.action("none", async (ctx) => {
@@ -1067,7 +1050,7 @@ bot.action("thanksto", async (ctx) => {
             `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> My Friend\n` +
             `❏<tg-emoji emoji-id="5402355073458123173"></tg-emoji> All User Cancer TrashFlocks\n` +
             `All User Cancer`;
-        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", icon_custom_emoji_id: "5462990652943904884" }]];
+        const button = [[{ text: "「 ♱ 」BACK", callback_data: "back", style: "Danger", icon_custom_emoji_id: "5462990652943904884" }]];
         await ctx.editMessageCaption(tqtoMenu, {
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: button }
@@ -2719,15 +2702,15 @@ bot.command("blockcmd", async (ctx) => {
         );
 
         const chatId = ctx.chat.id.toString();
-        blockcmdData = loadJSON(blockcmdFile) || {};
-        if (!blockcmdData[chatId]) blockcmdData[chatId] = [];
+        blockcmdData = loadBlockcmd();
+        if (!Array.isArray(blockcmdData[chatId])) blockcmdData[chatId] = [];
 
         if (blockcmdData[chatId].includes(cmd)) {
             return ctx.replyWithHTML(`<b>⚠️ Fitur <code>/${cmd}</code> sudah diblock di grup ini!</b>`);
         }
 
         blockcmdData[chatId].push(cmd);
-        saveJSON(blockcmdFile, blockcmdData);
+        saveBlockcmd(blockcmdData);
 
         await ctx.replyWithHTML(
             `<b>🚫 BLOCK CMD AKTIF</b>\n\n` +
@@ -2752,14 +2735,14 @@ bot.command("delblockcmd", async (ctx) => {
         );
 
         const chatId = ctx.chat.id.toString();
-        blockcmdData = loadJSON(blockcmdFile) || {};
-        if (!blockcmdData[chatId] || !blockcmdData[chatId].includes(cmd)) {
+        blockcmdData = loadBlockcmd();
+        if (!Array.isArray(blockcmdData[chatId]) || !blockcmdData[chatId].includes(cmd)) {
             return ctx.replyWithHTML(`<b>⚠️ Fitur <code>/${cmd}</code> tidak ada di list block grup ini!</b>`);
         }
 
         blockcmdData[chatId] = blockcmdData[chatId].filter(c => c !== cmd);
         if (blockcmdData[chatId].length === 0) delete blockcmdData[chatId];
-        saveJSON(blockcmdFile, blockcmdData);
+        saveBlockcmd(blockcmdData);
 
         await ctx.replyWithHTML(
             `<b>✅ BLOCK DIHAPUS</b>\n\n` +
@@ -2776,8 +2759,8 @@ bot.command("listblockcmd", async (ctx) => {
 
     try {
         const chatId = ctx.chat.id.toString();
-        blockcmdData = loadJSON(blockcmdFile) || {};
-        const list = blockcmdData[chatId] || [];
+        blockcmdData = loadBlockcmd();
+        const list = Array.isArray(blockcmdData[chatId]) ? blockcmdData[chatId] : [];
 
         if (list.length === 0) {
             return ctx.replyWithHTML(
