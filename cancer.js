@@ -609,7 +609,7 @@ const btnUtama = {
         return {
             inline_keyboard: [
                 [
-                    { text: "🚬 LIST TRASH", callback_data: "listtrash", style: style, icon_custom_emoji_id: "5465225015190367274" },
+                    { text: "🧤 LIST TRASH", callback_data: "listtrash", style: style, icon_custom_emoji_id: "5465225015190367274" },
                     { text: "🧉 FITURE", callback_data: "fitureMenu", style: style, icon_custom_emoji_id: "5465262274031659421" }
                 ],
                 [
