@@ -757,9 +757,9 @@ const btnTrashMenu = {
     inline_keyboard: [
         [
             { text: "💀 MURBUG SPAM", callback_data: "trash_murbug", style: "Danger" },
-            { text: "🔒 PRIVAT BUGS", callback_data: "trash_privat", style: "Primary" }
+            { text: "🎰 PRIVAT BUGS", callback_data: "trash_privat", style: "Primary" }
         ],
-        [{ text: "KEMBALI", callback_data: "back_start", style: "Succes" }]
+        [{ text: "KEMBALI", callback_data: "back_start", style: "Success" }]
     ]
 };
 
