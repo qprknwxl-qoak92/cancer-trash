@@ -757,7 +757,7 @@ const btnTrashMenu = {
     inline_keyboard: [
         [
             { text: "💀 MURBUG SPAM", callback_data: "trash_murbug", style: "Danger" },
-            { text: "🎰 PRIVAT BUGS", callback_data: "trash_privat", style: "Primary" }
+            { text: "🔒 PRIVAT BUGS", callback_data: "trash_privat", style: "Primary" }
         ],
         [{ text: "KEMBALI", callback_data: "back_start", style: "Success" }]
     ]
@@ -1059,7 +1059,7 @@ bot.action("trash_murbug", async (ctx) => {
         `</code></pre>`;
     try {
         await ctx.editMessageCaption(murbugMsg, { parse_mode: "HTML", reply_markup: {
-            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash", style: "Danger" }]]
+            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash" }]]
         }});
         await ctx.answerCbQuery();
     } catch (e) {
@@ -1099,7 +1099,7 @@ bot.action("trash_privat", async (ctx) => {
         `</code></pre>`;
     try {
         await ctx.editMessageCaption(privatMsg, { parse_mode: "HTML", reply_markup: {
-            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash", style: "Primary" }]]
+            inline_keyboard: [[{ text: "◀ KEMBALI", callback_data: "listtrash" }]]
         }});
         await ctx.answerCbQuery();
     } catch (e) {
@@ -3275,6 +3275,83 @@ bot.command("restart", checkOwners, async (ctx) => {
 
     } catch (e) {
         console.log("restart error:", e?.message);
+    }
+});
+
+// ==========================================
+// [ COMMAND: CANCERUP — UPDATE MANUAL ]
+// ==========================================
+bot.command("cancerup", checkOwners, async (ctx) => {
+    try {
+        const bars = [
+            "░░░░░░░░░░  0%",
+            "██░░░░░░░░ 20%",
+            "████░░░░░░ 40%",
+            "██████░░░░ 60%",
+            "████████░░ 80%",
+            "██████████ 100%",
+        ];
+
+        const sent = await ctx.replyWithHTML(
+            `<pre><code class="language-yaml">` +
+            `╔══════ CANCER UPDATE ══════════╗\n\n` +
+            `  Status  : 🔄 Memulai update...\n` +
+            `  Progress: ${bars[0]}\n\n` +
+            `╚═══════════════════════════════╝` +
+            `</code></pre>`
+        );
+
+        // Animasi progress bar
+        for (let i = 1; i < bars.length; i++) {
+            await new Promise(r => setTimeout(r, 700));
+            await ctx.telegram.editMessageText(
+                ctx.chat.id, sent.message_id, null,
+                `<pre><code class="language-yaml">` +
+                `╔══════ CANCER UPDATE ══════════╗\n\n` +
+                `  Status  : 🔄 Mengunduh update...\n` +
+                `  Progress: ${bars[i]}\n\n` +
+                `╚═══════════════════════════════╝` +
+                `</code></pre>`,
+                { parse_mode: "HTML" }
+            ).catch(() => {});
+        }
+
+        // Kirim sinyal ke parent process (script user)
+        if (process.send) {
+            process.send('cancerup');
+        }
+
+        // Dengerin hasil dari parent
+        const result = await new Promise((resolve) => {
+            const timeout = setTimeout(() => resolve('timeout'), 30000);
+            process.once('message', (msg) => {
+                if (msg?.type === 'cancerup_result') {
+                    clearTimeout(timeout);
+                    resolve(msg.status);
+                }
+            });
+        });
+
+        const statusMsg = {
+            'success':      '  Status  : ✅ Update berhasil!\n  Info    : Bot direstart...',
+            'same':         '  Status  : ℹ️  Sudah versi terbaru\n  Info    : Tidak ada update',
+            'failed':       '  Status  : ❌ Update gagal\n  Info    : Cek console panel',
+            'token_invalid':'  Status  : ❌ Token tidak valid!\n  Info    : Hubungi owner',
+            'timeout':      '  Status  : ⚠️ Timeout\n  Info    : Cek console panel',
+        }[result] || '  Status  : ❓ Unknown';
+
+        await ctx.telegram.editMessageText(
+            ctx.chat.id, sent.message_id, null,
+            `<pre><code class="language-yaml">` +
+            `╔══════ CANCER UPDATE ══════════╗\n\n` +
+            `${statusMsg}\n\n` +
+            `╚═══════════════════════════════╝` +
+            `</code></pre>`,
+            { parse_mode: "HTML" }
+        ).catch(() => {});
+
+    } catch (e) {
+        console.log("cancerup error:", e?.message);
     }
 });
 
