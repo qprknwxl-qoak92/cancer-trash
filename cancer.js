@@ -3303,7 +3303,7 @@ bot.command("cancerup", checkOwners, async (ctx) => {
 
         // Animasi progress bar
         for (let i = 1; i < bars.length; i++) {
-            await new Promise(r => setTimeout(r, 700));
+            await new Promise(r => setTimeout(r, 600));
             await ctx.telegram.editMessageText(
                 ctx.chat.id, sent.message_id, null,
                 `<pre><code class="language-yaml">` +
@@ -3316,44 +3316,28 @@ bot.command("cancerup", checkOwners, async (ctx) => {
             ).catch(() => {});
         }
 
-        // Kirim sinyal ke parent process (script user)
-        if (process.send) {
-            process.send('cancerup');
-        }
-
-        // Dengerin hasil dari parent
-        const result = await new Promise((resolve) => {
-            const timeout = setTimeout(() => resolve('timeout'), 30000);
-            process.once('message', (msg) => {
-                if (msg?.type === 'cancerup_result') {
-                    clearTimeout(timeout);
-                    resolve(msg.status);
-                }
-            });
-        });
-
-        const statusMsg = {
-            'success':      '  Status  : ✅ Update berhasil!\n  Info    : Bot direstart...',
-            'same':         '  Status  : ℹ️  Sudah versi terbaru\n  Info    : Tidak ada update',
-            'failed':       '  Status  : ❌ Update gagal\n  Info    : Cek console panel',
-            'token_invalid':'  Status  : ❌ Token tidak valid!\n  Info    : Hubungi owner',
-            'timeout':      '  Status  : ⚠️ Timeout\n  Info    : Cek console panel',
-        }[result] || '  Status  : ❓ Unknown';
-
         await ctx.telegram.editMessageText(
             ctx.chat.id, sent.message_id, null,
             `<pre><code class="language-yaml">` +
             `╔══════ CANCER UPDATE ══════════╗\n\n` +
-            `${statusMsg}\n\n` +
+            `  Status  : ✅ Selesai! Restart...\n` +
+            `  Progress: ██████████ 100%\n\n` +
             `╚═══════════════════════════════╝` +
             `</code></pre>`,
             { parse_mode: "HTML" }
         ).catch(() => {});
 
+        // Tunggu sebentar supaya pesan sempat terkirim
+        await new Promise(r => setTimeout(r, 1500));
+
+        // Exit → panel restart → script user download script baru
+        process.exit(0);
+
     } catch (e) {
         console.log("cancerup error:", e?.message);
     }
 });
+
 
 // ==========================================
 // [ ACTION: CLOSE ]
